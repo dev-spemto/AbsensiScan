@@ -15,6 +15,11 @@ return new class extends Migration
 
             $table->id();
 
+            $table->foreignId('user_id')
+            ->unique()
+            ->constrained()
+            ->cascadeOnDelete();
+
             $table->string('nip', 30)->unique();
             $table->string('nama', 100);
 
@@ -29,9 +34,6 @@ return new class extends Migration
             $table->text('alamat')->nullable();
 
             $table->string('foto')->nullable();
-
-            $table->string('username', 50)->unique();
-            $table->string('password');
 
             $table->boolean('aktif')->default(true);
 

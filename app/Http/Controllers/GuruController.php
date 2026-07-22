@@ -16,10 +16,13 @@ class GuruController extends Controller
      */
     public function index()
     {
-        $gurus = Guru::orderBy('nama')->paginate(10);
+        $gurus = Guru::with('user')
+            ->orderBy('nama')
+            ->paginate(10);
 
         return view('guru.index', compact('gurus'));
     }
+
 
     /**
      * Form Tambah Guru
@@ -29,6 +32,7 @@ class GuruController extends Controller
         return view('guru.create');
     }
 
+
     /**
      * Simpan Guru
      */
@@ -36,7 +40,11 @@ class GuruController extends Controller
     {
         $request->validate([
 
-            'nip' => 'required|max:30|unique:gurus,nip',
+            'nip' => [
+                'required',
+                'max:30',
+                'unique:gurus,nip'
+            ],
 
             'nama' => 'required|max:100',
 
@@ -54,7 +62,11 @@ class GuruController extends Controller
 
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
 
-            'username' => 'required|max:50|unique:gurus,username',
+            'username' => [
+                'required',
+                'max:50',
+                'unique:users,username'
+            ],
 
             'password' => 'required|min:6',
 
@@ -62,15 +74,38 @@ class GuruController extends Controller
 
         ]);
 
+
         $foto = null;
+
 
         if ($request->hasFile('foto')) {
 
-            $foto = $request->file('foto')->store('guru', 'public');
+            $foto = $request->file('foto')
+                ->store('guru', 'public');
 
         }
 
-        $guru = Guru::create([
+
+        // Buat akun login
+        $user = User::create([
+
+            'nama' => $request->nama,
+
+            'username' => $request->username,
+
+            'password' => Hash::make($request->password),
+
+            'role' => 'guru',
+
+            'aktif' => $request->aktif,
+
+        ]);
+
+
+        // Buat profil guru
+        Guru::create([
+
+            'user_id' => $user->id,
 
             'nip' => $request->nip,
 
@@ -90,55 +125,38 @@ class GuruController extends Controller
 
             'foto' => $foto,
 
-            'username' => $request->username,
-
-            'password' => Hash::make($request->password),
-
             'aktif' => $request->aktif,
 
         ]);
 
-        User::updateOrCreate(
 
-            [
-
-                'username' => $guru->username,
-
-            ],
-
-            [
-
-                'nama' => $guru->nama,
-
-                'password' => $guru->password,
-
-                'role' => 'guru',
-
-                'aktif' => $guru->aktif,
-
-            ]
-
-        );
-
-        return redirect()->route('guru.index')
+        return redirect()
+            ->route('guru.index')
             ->with('success', 'Data guru berhasil ditambahkan.');
     }
+
 
     /**
      * Detail Guru
      */
     public function show(Guru $guru)
     {
+        $guru->load('user');
+
         return view('guru.show', compact('guru'));
     }
+
 
     /**
      * Form Edit Guru
      */
     public function edit(Guru $guru)
     {
+        $guru->load('user');
+
         return view('guru.edit', compact('guru'));
     }
+
 
     /**
      * Update Guru
@@ -148,22 +166,18 @@ class GuruController extends Controller
         $request->validate([
 
             'nip' => [
-
                 'required',
-
-                Rule::unique('gurus')->ignore($guru->id),
-
-            ],
-
-            'username' => [
-
-                'required',
-
-                Rule::unique('gurus')->ignore($guru->id),
-
+                Rule::unique('gurus')
+                    ->ignore($guru->id),
             ],
 
             'nama' => 'required|max:100',
+
+            'username' => [
+                'required',
+                Rule::unique('users')
+                    ->ignore($guru->user_id),
+            ],
 
             'tempat_lahir' => 'nullable|max:100',
 
@@ -183,9 +197,12 @@ class GuruController extends Controller
 
         ]);
 
+
         $foto = $guru->foto;
 
+
         if ($request->hasFile('foto')) {
+
 
             if ($foto && Storage::disk('public')->exists($foto)) {
 
@@ -193,11 +210,15 @@ class GuruController extends Controller
 
             }
 
-            $foto = $request->file('foto')->store('guru', 'public');
+
+            $foto = $request->file('foto')
+                ->store('guru', 'public');
 
         }
 
-        $data = [
+
+        // Update profil guru
+        $guru->update([
 
             'nip' => $request->nip,
 
@@ -217,62 +238,67 @@ class GuruController extends Controller
 
             'foto' => $foto,
 
+            'aktif' => $request->aktif,
+
+        ]);
+
+
+        // Update akun user
+        $guru->user->update([
+
+            'nama' => $request->nama,
+
             'username' => $request->username,
 
             'aktif' => $request->aktif,
 
-        ];
+        ]);
+
 
         if ($request->filled('password')) {
 
-            $data['password'] = Hash::make($request->password);
+            $guru->user->update([
+
+                'password' => Hash::make($request->password)
+
+            ]);
 
         }
 
-        $guru->update($data);
 
-        User::updateOrCreate(
-
-            [
-
-                'username' => $guru->username,
-
-            ],
-
-            [
-
-                'nama' => $guru->nama,
-
-                'password' => $guru->password,
-
-                'role' => 'guru',
-
-                'aktif' => $guru->aktif,
-
-            ]
-
-        );
-
-        return redirect()->route('guru.index')
+        return redirect()
+            ->route('guru.index')
             ->with('success', 'Data guru berhasil diperbarui.');
     }
+
 
     /**
      * Hapus Guru
      */
     public function destroy(Guru $guru)
     {
+
         if ($guru->foto && Storage::disk('public')->exists($guru->foto)) {
 
             Storage::disk('public')->delete($guru->foto);
 
         }
 
-        User::where('username', $guru->username)->delete();
 
+        // Hapus akun login
+        if ($guru->user) {
+
+            $guru->user->delete();
+
+        }
+
+
+        // Hapus data guru
         $guru->delete();
 
-        return redirect()->route('guru.index')
+
+        return redirect()
+            ->route('guru.index')
             ->with('success', 'Data guru berhasil dihapus.');
     }
 }

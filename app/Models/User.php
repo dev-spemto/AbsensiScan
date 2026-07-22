@@ -9,6 +9,7 @@ class User extends Authenticatable
 {
     use Notifiable;
 
+
     protected $fillable = [
 
         'nama',
@@ -23,6 +24,7 @@ class User extends Authenticatable
 
     ];
 
+
     protected $hidden = [
 
         'password',
@@ -31,13 +33,22 @@ class User extends Authenticatable
 
     ];
 
-    protected $casts = [
 
-        'password' => 'hashed',
+    protected $casts = [
 
         'aktif' => 'boolean',
 
     ];
+
+
+    /**
+     * Relasi ke data guru
+     */
+    public function guru()
+    {
+        return $this->hasOne(Guru::class);
+    }
+
 
     /**
      * Cek apakah user Administrator
@@ -47,6 +58,7 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
+
     /**
      * Cek apakah user Guru
      */
@@ -54,6 +66,7 @@ class User extends Authenticatable
     {
         return $this->role === 'guru';
     }
+
 
     /**
      * Cek apakah akun aktif

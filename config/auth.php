@@ -1,31 +1,31 @@
 <?php
 
-use App\Models\Guru;
+use App\Models\User;
 
 return [
 
     'defaults' => [
         'guard' => 'web',
-        'passwords' => 'gurus',
+        'passwords' => 'users',
     ],
 
     'guards' => [
         'web' => [
             'driver' => 'session',
-            'provider' => 'gurus',
+            'provider' => 'users',
         ],
     ],
 
     'providers' => [
-        'gurus' => [
+        'users' => [
             'driver' => 'eloquent',
-            'model' => Guru::class,
+            'model' => User::class,
         ],
     ],
 
     'passwords' => [
-        'gurus' => [
-            'provider' => 'gurus',
+        'users' => [
+            'provider' => 'users',
             'table' => 'password_reset_tokens',
             'expire' => 60,
             'throttle' => 60,

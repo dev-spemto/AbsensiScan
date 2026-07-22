@@ -2,17 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Guru extends Authenticatable
+class Guru extends Model
 {
-    use Notifiable;
-
     protected $table = 'gurus';
 
     protected $fillable = [
+
+        'user_id',
 
         'nip',
 
@@ -32,21 +31,10 @@ class Guru extends Authenticatable
 
         'foto',
 
-        'username',
-
-        'password',
-
         'aktif',
 
     ];
 
-    protected $hidden = [
-
-        'password',
-
-        'remember_token',
-
-    ];
 
     protected $casts = [
 
@@ -54,9 +42,17 @@ class Guru extends Authenticatable
 
         'aktif' => 'boolean',
 
-        'password' => 'hashed',
-
     ];
+
+
+    /**
+     * Relasi ke akun login
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
 
     /**
      * Relasi Presensi
@@ -66,8 +62,9 @@ class Guru extends Authenticatable
         return $this->hasMany(Presensi::class);
     }
 
+
     /**
-     * Cek akun aktif
+     * Cek guru aktif
      */
     public function isAktif(): bool
     {
