@@ -64,7 +64,9 @@
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Kelas</label>
 
-                    <select name="kelas_id" class="form-select">
+                    <select name="kelas_id" class="form-select" required>
+
+                        <option value="">-- Pilih Kelas --</option>
 
                         @foreach($kelas as $k)
 
@@ -73,6 +75,25 @@
                             </option>
 
                         @endforeach
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Jabatan</label>
+
+                    <select name="jabatan" class="form-select">
+
+                        <option value="">Tidak Ada Jabatan</option>
+
+                        <option value="Ketua Kelas">
+                            Ketua Kelas
+                        </option>
+
+                        <option value="Sekretaris">
+                            Sekretaris
+                        </option>
 
                     </select>
 

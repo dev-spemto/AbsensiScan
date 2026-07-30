@@ -11,7 +11,7 @@
 
 body{
     font-family: DejaVu Sans, sans-serif;
-    font-size:12px;
+    font-size:11px;
 }
 
 h2{
@@ -33,8 +33,8 @@ table{
 table th,
 table td{
     border:1px solid #000;
-    padding:6px;
-    font-size:11px;
+    padding:5px;
+    font-size:10px;
 }
 
 table th{
@@ -76,13 +76,19 @@ SMP Muhammadiyah Tonjong
 
 <th>Jam</th>
 
-<th>Nama Siswa</th>
+<th>Nama</th>
 
 <th>Kelas</th>
 
+<th>Status</th>
+
+<th>Petugas Scan</th>
+
+<th>Role</th>
+
 <th>Guru</th>
 
-<th>Status</th>
+<th>Metode</th>
 
 </tr>
 
@@ -92,7 +98,19 @@ SMP Muhammadiyah Tonjong
 
 @php
 
-$no=1;
+$no = 1;
+
+$role = [
+
+    'admin' => 'Admin',
+
+    'guru' => 'Guru',
+
+    'ketua_kelas' => 'Ketua Kelas',
+
+    'sekretaris' => 'Sekretaris',
+
+];
 
 @endphp
 
@@ -120,19 +138,13 @@ $no=1;
 
 <td>
 
-{{ $presensi->siswa->nama }}
+{{ optional($presensi->siswa)->nama ?? '-' }}
 
 </td>
 
 <td>
 
-{{ $presensi->siswa->kelas->nama_lengkap }}
-
-</td>
-
-<td>
-
-{{ $presensi->guru->nama }}
+{{ optional(optional($presensi->siswa)->kelas)->nama_lengkap ?? '-' }}
 
 </td>
 
@@ -142,13 +154,37 @@ $no=1;
 
 </td>
 
+<td>
+
+{{ optional($presensi->scanner)->nama ?? '-' }}
+
+</td>
+
+<td>
+
+{{ $role[$presensi->scan_by] ?? '-' }}
+
+</td>
+
+<td>
+
+{{ optional($presensi->guru)->nama ?? '-' }}
+
+</td>
+
+<td>
+
+{{ $presensi->metode }}
+
+</td>
+
 </tr>
 
 @empty
 
 <tr>
 
-<td colspan="7" class="text-center">
+<td colspan="10" class="text-center">
 
 Tidak ada data.
 

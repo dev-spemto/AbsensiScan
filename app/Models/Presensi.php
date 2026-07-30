@@ -4,21 +4,36 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\User;
 
 class Presensi extends Model
 {
     protected $table = 'presensis';
 
     protected $fillable = [
+
         'siswa_id',
+
         'guru_id',
+
+        'scanner_id',
+
+        'scan_by',
+
         'tahun_ajaran_id',
+
         'tanggal',
+
         'jam_scan',
+
         'status',
+
         'metode',
+
         'keterangan',
+
         'device_name',
+
     ];
 
     protected $casts = [
@@ -47,5 +62,10 @@ class Presensi extends Model
     public function tahunAjaran(): BelongsTo
     {
         return $this->belongsTo(TahunAjaran::class);
+    }
+
+    public function scanner()
+    {
+        return $this->belongsTo(User::class, 'scanner_id');
     }
 }

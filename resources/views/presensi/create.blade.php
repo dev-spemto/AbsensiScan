@@ -5,41 +5,67 @@
 <style>
 
 #hasilScan{
-
-    transition:.35s;
-
+    transition:.4s;
+    border-radius:18px;
+    overflow:hidden;
 }
 
 .scan-success{
-
-    animation:scanSuccess .45s ease;
-
+    animation:scanSuccess .55s ease;
 }
 
 @keyframes scanSuccess{
 
     0%{
-
-        transform:scale(.92);
-
-        opacity:.4;
-
+        transform:scale(.95);
+        opacity:.5;
     }
 
-    60%{
-
+    50%{
         transform:scale(1.03);
-
     }
 
     100%{
-
         transform:scale(1);
-
         opacity:1;
-
     }
 
+}
+
+.bg-purple {
+    background-color: #6f42c1 !important;
+    color: white !important;
+}
+
+#fotoSiswa{
+    width:220px;
+    height:220px;
+    object-fit:cover;
+    border-radius:18px;
+    transition:.35s;
+    border:5px solid #e9ecef;
+    box-shadow:0 10px 25px rgba(0,0,0,.12);
+}
+
+.scan-success #fotoSiswa{
+    transform:scale(1.05);
+    border-color:#198754;
+}
+
+#namaSiswa{
+    font-size:28px;
+    font-weight:700;
+    letter-spacing:.5px;
+}
+
+#kelasSiswa{
+    font-size:18px;
+}
+
+#jamScan{
+    font-size:32px;
+    font-weight:bold;
+    color:#198754;
 }
 
 </style>
@@ -49,6 +75,63 @@
 @section('title','Scan Presensi')
 
 @section('content')
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-body">
+
+        <div class="row align-items-center">
+
+            <div class="col-md-2 text-center">
+
+                @if($pengaturan && $pengaturan->logo)
+
+                    <img
+                        src="{{ asset('storage/'.$pengaturan->logo) }}"
+                        width="90">
+
+                @endif
+
+            </div>
+
+            <div class="col-md-10">
+
+                <h3 class="mb-1">
+
+                    {{ $pengaturan->nama_sekolah ?? 'Nama Sekolah' }}
+
+                </h3>
+
+                <div>
+
+                    Tahun Ajaran :
+                    <strong>
+
+                        {{ $tahunAjaran->nama ?? '-' }}
+
+                    </strong>
+
+                </div>
+
+                <div>
+
+                    Jam Scan
+
+                    {{ $pengaturan->scan_mulai }}
+
+                    -
+
+                    {{ $pengaturan->scan_selesai }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
 
@@ -127,43 +210,36 @@
 
                     <hr>
 
-            <div class="text-center">
+            <div id="hasilScan" class="text-center bg-white rounded-4 p-4 shadow-sm">
 
                 <img id="fotoSiswa"
-                     src="https://ui-avatars.com/api/?name=Siswa&size=220"
-                     class="img-fluid rounded shadow-sm mb-3"
-                     style="max-height:220px;object-fit:cover;">
+                    src="https://ui-avatars.com/api/?name=Siswa&size=220"
+                    alt="Foto Siswa">
 
-                <h4 id="namaSiswa" class="fw-bold">
+                <h3 id="namaSiswa" class="mt-4 mb-1">
+
+                    Menunggu Scan...
+
+                </h3>
+
+                <div id="kelasSiswa" class="text-secondary mb-3">
 
                     -
-
-                </h4>
-
-                <div class="text-muted mb-2">
-
-                    <span id="kelasSiswa">
-
-                        -
-
-                    </span>
 
                 </div>
 
                 <span id="statusSiswa"
-                      class="badge bg-secondary fs-6">
+                    class="badge bg-secondary px-4 py-2 fs-6">
 
-                    Menunggu Scan
+                    SIAP SCAN
 
                 </span>
 
-                <div class="mt-3">
+                <div class="mt-4">
 
                     <strong id="jamScan">
 
-                        --
-
-:--
+                        --:--
 
                     </strong>
 
@@ -213,6 +289,8 @@
 
                             <th>Status</th>
 
+                            <th>Scan Oleh</th>
+
                         </tr>
 
                     </thead>
@@ -223,22 +301,56 @@
 
                         <tr>
 
-                            <td>{{ substr($item->jam_scan,0,5) }}</td>
+                            <td>
 
-                            <td>{{ $item->siswa->nama }}</td>
+                                {{ substr($item->jam_scan,0,5) }}
 
-                            <td>{{ $item->siswa->kelas->nama_lengkap }}</td>
+                            </td>
+
+                            <td>
+
+                                <img
+                                    src="{{ $item->siswa->foto
+                                        ? asset('storage/'.$item->siswa->foto)
+                                        : 'https://ui-avatars.com/api/?name='.urlencode($item->siswa->nama) }}"
+                                    width="45"
+                                    height="45"
+                                    class="rounded-circle border">
+
+                            </td>
+
+                            <td>
+
+                                <strong>
+
+                                    {{ $item->siswa->nama }}
+
+                                </strong>
+
+                            </td>
+
+                            <td>
+
+                                {{ $item->siswa->kelas->nama_lengkap }}
+
+                            </td>
 
                             <td>
 
                                 @php
 
                                     $warna = [
+
                                         'Hadir'=>'success',
+
                                         'Terlambat'=>'warning',
+
                                         'Izin'=>'primary',
-                                        'Sakit'=>'info',
+
+                                        'Sakit'=>'purple',
+
                                         'Alpha'=>'danger',
+
                                     ];
 
                                 @endphp
@@ -251,13 +363,51 @@
 
                             </td>
 
+                            <td>
+
+                                @php
+
+                                    $roleColor = [
+
+                                        'admin' => 'danger',
+
+                                        'guru' => 'success',
+
+                                        'ketua_kelas' => 'primary',
+
+                                        'sekretaris' => 'purple',
+
+                                    ];
+
+                                @endphp
+
+                                <div>
+
+                                    <strong>
+
+                                        {{ optional($item->scanner)->nama ?? '-' }}
+
+                                    </strong>
+
+                                    <br>
+
+                                    <span class="badge bg-{{ $roleColor[$item->scan_by] ?? 'secondary' }}">
+
+                                        {{ ucwords(str_replace('_',' ',$item->scan_by)) }}
+
+                                    </span>
+
+                                </div>
+
+                            </td>
+
                         </tr>
 
                         @empty
 
                         <tr>
 
-                            <td colspan="4"
+                            <td colspan="6"
                                 class="text-center text-muted py-5">
 
                                 Belum ada presensi hari ini.
@@ -296,7 +446,7 @@ const status = document.getElementById('statusSiswa');
 
 const jam = document.getElementById('jamScan');
 
-let scanTimeout = null;
+const hasil = document.getElementById('hasilScan');
 
 let sedangScan = false;
 
@@ -306,126 +456,93 @@ const audioError = new Audio('/sounds/error.mp3');
 
 barcode.focus();
 
-function scanBarcode(){
+async function scanBarcode(){
 
     if(sedangScan){
-
-    return;
-
-}
-
-sedangScan = true;
-
-    if(barcode.value.trim()===''){
-
-        sedangScan = false;
-
-        barcode.focus();
-
         return;
-
     }
 
-    fetch("{{ route('presensi.scan') }}",{
+    sedangScan = true;
 
-        method:'POST',
+    if(barcode.value.trim()===''){
+        sedangScan = false;
+        barcode.focus();
+        return;
+    }
 
-        headers:{
+    try{
 
-            'Content-Type':'application/json',
+        const response = await fetch("{{ route('presensi.scan') }}",{
 
-            'Accept':'application/json',
+            method:'POST',
 
-            'X-CSRF-TOKEN':document
-                .querySelector('meta[name=csrf-token]')
-                .content
+            headers:{
+                'Content-Type':'application/json',
+                'Accept':'application/json',
+                'X-CSRF-TOKEN':document
+                    .querySelector('meta[name=csrf-token]')
+                    .content
+            },
 
-        },
+            body:JSON.stringify({
+                barcode:barcode.value.trim()
+            })
 
-        body:JSON.stringify({
+        });
 
-            barcode:barcode.value
-
-        })
-
-    })
-
-    .then(res=>res.json())
-
-    .then(res=>{
+        const res = await response.json();
 
         if(res.success){
 
             tampilkanData(res);
 
-            sedangScan = false;
+        }else{
 
-    }else{
+            audioError.currentTime = 0;
+            audioError.play();
 
-    audioError.currentTime = 0;
+            Swal.fire({
+                icon:'warning',
+                title:'Perhatian',
+                text:res.message,
+                timer:1800,
+                showConfirmButton:false
+            });
 
-    audioError.play();
+            barcode.value='';
+            barcode.focus();
 
-    Swal.fire({
+        }
 
-        icon:'warning',
+    }catch(error){
 
-        title:'Perhatian',
+        console.error(error);
 
-        text:res.message,
+        Swal.fire({
+            icon:'error',
+            title:'Server Error',
+            text:'Terjadi kesalahan pada server.'
+        });
 
-        timer:1800,
-
-        showConfirmButton:false
-
-    });
-
-    barcode.value='';
-
-    barcode.focus();
+    }
 
     sedangScan = false;
 
 }
-    })
 
-.catch((error)=>{
+barcode.addEventListener('keydown', function(e){
 
-    sedangScan = false;
+    if(e.key === 'Enter'){
 
-    Swal.fire({
+        e.preventDefault();
 
-        icon:'error',
-
-        title:'Server Error',
-
-        text:'Terjadi kesalahan pada server.'
-
-    });
-
-    barcode.value='';
-
-    barcode.focus();
-
-    console.error(error);
-
-});
-
-}
-
-barcode.addEventListener('input',function(){
-
-    clearTimeout(scanTimeout);
-
-    scanTimeout = setTimeout(function(){
-
-        if(barcode.value.trim()!==''){
+        if(barcode.value.trim() !== ''){
 
             scanBarcode();
 
         }
 
-    },150);
+    }
 
 });
 
@@ -442,7 +559,7 @@ function tampilkanData(data){
     let warna = 'secondary';
 
     switch(data.status){
-
+        
         case 'Hadir':
             warna = 'success';
             break;
@@ -456,7 +573,7 @@ function tampilkanData(data){
             break;
 
         case 'Sakit':
-            warna = 'info';
+            warna = '#6f42c1';
             break;
 
         case 'Alpha':
@@ -465,14 +582,60 @@ function tampilkanData(data){
 
     }
 
-    status.className = 'badge fs-6 bg-'+warna;
+    status.className = 'badge px-4 py-2 fs-6';
+
+    status.style.backgroundColor = warna;
+
+    status.style.color = 'white';
 
     status.innerHTML = data.status;
-    
-    audioSuccess.currentTime = 0;
-    
-    audioSuccess.play();
-    
+
+    const hasil = document.getElementById('hasilScan');
+
+    console.log(data.status);
+
+    hasil.className = 'text-center rounded-4 p-4 shadow';
+
+    switch(data.status){
+
+    case 'Hadir':
+
+        hasil.classList.add('bg-success','text-white');
+
+        break;
+
+    case 'Terlambat':
+
+        hasil.classList.add('bg-warning');
+
+        break;
+
+    case 'Izin':
+
+        hasil.classList.add('bg-primary','text-white');
+
+        break;
+
+    case 'Sakit':
+
+        hasil.style.backgroundColor = '#6f42c1';
+
+        hasil.style.color = 'white';
+
+        break;
+
+    case 'Alpha':
+
+        hasil.classList.add('bg-danger','text-white');
+
+        break;
+
+    default:
+
+        hasil.classList.add('bg-white');
+
+    }
+
     audioSuccess.currentTime = 0;
     
     audioSuccess.play();
@@ -516,7 +679,7 @@ function tampilkanData(data){
 
             <td>
 
-                <span class="badge bg-${warna}">
+                <span class="badge" style="background-color:${warna}; color:white;">
 
                     ${data.status}
 

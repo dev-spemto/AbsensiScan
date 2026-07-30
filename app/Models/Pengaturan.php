@@ -7,14 +7,40 @@ use Illuminate\Database\Eloquent\Model;
 class Pengaturan extends Model
 {
     protected $fillable = [
+
         'nama_sekolah',
+
         'logo',
+
         'jam_masuk',
+
         'batas_terlambat',
+
         'scan_mulai',
+
         'scan_selesai',
+
         'timezone',
+
         'aktifkan_foto',
+
         'aktifkan_suara',
+
+        'alamat_sekolah',
+
+        'telepon',
+
+        'email',
+
+        'kepala_sekolah',
+
+    ];
+
+    protected $casts = [
+
+        'aktifkan_foto' => 'boolean',
+
+        'aktifkan_suara' => 'boolean',
+
     ];
 }

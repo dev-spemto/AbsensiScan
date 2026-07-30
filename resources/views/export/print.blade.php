@@ -10,68 +10,40 @@
 <style>
 
 body{
-
-    font-family: Arial, Helvetica, sans-serif;
-
-    font-size:13px;
-
+    font-family:Arial, Helvetica, sans-serif;
+    font-size:12px;
     color:#000;
-
 }
 
 h2{
-
     text-align:center;
-
     margin-bottom:5px;
-
 }
 
 p{
-
     text-align:center;
-
     margin-top:0;
-
     margin-bottom:20px;
-
 }
 
 table{
-
     width:100%;
-
     border-collapse:collapse;
-
 }
 
 table th,
 table td{
-
     border:1px solid #000;
-
     padding:6px;
-
-    font-size:12px;
-
+    font-size:11px;
 }
 
 table th{
-
     background:#f1f1f1;
-
 }
 
 .text-center{
-
     text-align:center;
-
-}
-
-.badge{
-
-    font-weight:bold;
-
 }
 
 </style>
@@ -98,19 +70,25 @@ SMP Muhammadiyah Tonjong
 
 <tr>
 
-    <th>No</th>
+<th>No</th>
 
-    <th>Tanggal</th>
+<th>Tanggal</th>
 
-    <th>Jam</th>
+<th>Jam</th>
 
-    <th>Nama</th>
+<th>Nama</th>
 
-    <th>Kelas</th>
+<th>Kelas</th>
 
-    <th>Guru</th>
+<th>Status</th>
 
-    <th>Status</th>
+<th>Petugas Scan</th>
+
+<th>Role</th>
+
+<th>Guru</th>
+
+<th>Metode</th>
 
 </tr>
 
@@ -118,55 +96,101 @@ SMP Muhammadiyah Tonjong
 
 <tbody>
 
-@foreach($presensis as $index => $presensi)
+@php
+
+$role = [
+
+    'admin' => 'Admin',
+
+    'guru' => 'Guru',
+
+    'ketua_kelas' => 'Ketua Kelas',
+
+    'sekretaris' => 'Sekretaris',
+
+];
+
+@endphp
+
+@forelse($presensis as $index => $presensi)
 
 <tr>
 
-    <td class="text-center">
+<td class="text-center">
 
-        {{ $index + 1 }}
+{{ $index + 1 }}
 
-    </td>
+</td>
 
-    <td>
+<td>
 
-        {{ \Carbon\Carbon::parse($presensi->tanggal)->format('d-m-Y') }}
+{{ \Carbon\Carbon::parse($presensi->tanggal)->format('d-m-Y') }}
 
-    </td>
+</td>
 
-    <td>
+<td>
 
-        {{ substr($presensi->jam_scan,0,5) }}
+{{ substr($presensi->jam_scan,0,5) }}
 
-    </td>
+</td>
 
-    <td>
+<td>
 
-        {{ $presensi->siswa->nama }}
+{{ optional($presensi->siswa)->nama ?? '-' }}
 
-    </td>
+</td>
 
-    <td>
+<td>
 
-        {{ $presensi->siswa->kelas->nama_lengkap }}
+{{ optional(optional($presensi->siswa)->kelas)->nama_lengkap ?? '-' }}
 
-    </td>
+</td>
 
-    <td>
+<td class="text-center">
 
-        {{ $presensi->guru->nama }}
+{{ $presensi->status }}
 
-    </td>
+</td>
 
-    <td class="text-center">
+<td>
 
-        {{ $presensi->status }}
+{{ optional($presensi->scanner)->nama ?? '-' }}
 
-    </td>
+</td>
+
+<td>
+
+{{ $role[$presensi->scan_by] ?? '-' }}
+
+</td>
+
+<td>
+
+{{ optional($presensi->guru)->nama ?? '-' }}
+
+</td>
+
+<td>
+
+{{ $presensi->metode }}
+
+</td>
 
 </tr>
 
-@endforeach
+@empty
+
+<tr>
+
+<td colspan="10" class="text-center">
+
+Tidak ada data.
+
+</td>
+
+</tr>
+
+@endforelse
 
 </tbody>
 

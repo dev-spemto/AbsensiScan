@@ -79,6 +79,7 @@
                         <th>NISN</th>
                         <th>Nama</th>
                         <th>Kelas</th>
+                        <th>Jabatan</th>
                         <th>Status</th>
                         <th width="170" class="text-center">Aksi</th>
 
@@ -134,6 +135,36 @@
                         <td>
 
                             {{ $siswa->kelas->nama_lengkap }}
+
+                        </td>
+
+                        <td>
+
+                            @if($siswa->jabatan == 'Ketua Kelas')
+
+                                <span class="badge bg-success">
+
+                                    Ketua Kelas
+
+                                </span>
+
+                            @elseif($siswa->jabatan == 'Sekretaris')
+
+                                <span class="badge bg-primary">
+
+                                    Sekretaris
+
+                                </span>
+
+                            @else
+
+                                <span class="text-muted">
+
+                                    -
+
+                                </span>
+
+                            @endif
 
                         </td>
 
@@ -203,7 +234,7 @@
 
                     <tr>
 
-                        <td colspan="8" class="text-center text-muted py-5">
+                        <td colspan="9" class="text-center text-muted py-5">
 
                             <i class="fa-solid fa-folder-open fa-2x mb-3 d-block"></i>
 

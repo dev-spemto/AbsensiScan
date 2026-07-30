@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LoginLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use App\Helpers\ActivityHelper;
 
 class AuthController extends Controller
 {
@@ -56,9 +59,91 @@ class AuthController extends Controller
 
             }
 
-            return redirect()->route('dashboard');
+            /*
+            |------------------------------------------------------------------
+            | Simpan Login Berhasil
+            |------------------------------------------------------------------
+            */
+
+            LoginLog::create([
+
+                'user_id'    => $user->id,
+
+                'nama'       => $user->nama,
+
+                'username'   => $user->username,
+
+                'role'       => $user->role,
+
+                'ip_address' => $request->ip(),
+
+                'user_agent' => $request->userAgent(),
+
+                'status'     => 'berhasil',
+
+                'login_at'   => now(),
+
+            ]);
+
+            /*
+            |------------------------------------------------------------------
+            | Redirect Berdasarkan Role
+            |------------------------------------------------------------------
+            */
+
+            if ($user->isAdmin()) {
+
+                return redirect()->route('dashboard');
+
+            }
+
+            if ($user->isGuru()) {
+
+                return redirect()->route('presensi.create');
+
+            }
+
+            if (
+                $user->isKetuaKelas() ||
+                $user->isWakilKelas() ||
+                $user->isSekretaris()
+            ) {
+
+                return redirect()->route('presensi.create');
+
+            }
+
+            Auth::logout();
+
+            return back()->with('error', 'Role akun tidak dikenali.');
 
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Simpan Login Gagal
+        |--------------------------------------------------------------------------
+        */
+
+        LoginLog::create([
+
+            'user_id'    => null,
+
+            'nama'       => '-',
+
+            'username'   => $request->username,
+
+            'role'       => '-',
+
+            'ip_address' => $request->ip(),
+
+            'user_agent' => $request->userAgent(),
+
+            'status'     => 'gagal',
+
+            'login_at'   => now(),
+
+        ]);
 
         return back()
             ->withInput()
@@ -70,6 +155,16 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
+        if (auth()->check()) {
+
+            ActivityHelper::log(
+                'Logout',
+                'Autentikasi',
+                'Logout dari sistem'
+            );
+
+        }
+
         Auth::logout();
 
         $request->session()->invalidate();
@@ -77,5 +172,61 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('login');
+    }
+
+    /**
+     * Profil
+     */
+    public function profil()
+    {
+        return view('auth.profil');
+    }
+
+    /**
+     * Form Ubah Password
+     */
+    public function editPassword()
+    {
+        return view('auth.password');
+    }
+
+    /**
+     * Simpan Password Baru
+     */
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+
+            'password_lama' => 'required',
+
+            'password' => 'required|min:6|confirmed',
+
+        ]);
+
+        $user = auth()->user();
+
+        if (!Hash::check($request->password_lama, $user->password)) {
+
+            return back()->withErrors([
+                'password_lama' => 'Password lama tidak sesuai.'
+            ]);
+
+        }
+
+        $user->update([
+
+            'password' => Hash::make($request->password),
+
+        ]);
+
+        ActivityHelper::log(
+            'Ubah Password',
+            'Profil',
+            'Mengubah password akun'
+        );
+
+        return redirect()
+            ->route('profil')
+            ->with('success', 'Password berhasil diubah.');
     }
 }

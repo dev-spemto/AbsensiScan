@@ -2,99 +2,118 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Siswa;
 use App\Models\Guru;
-use App\Models\Kelas;
+use App\Models\Pengaturan;
 use App\Models\Presensi;
-use App\Models\TahunAjaran;
-use Illuminate\Support\Carbon;
+use App\Models\Siswa;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     public function index()
     {
+        $pengaturan = Pengaturan::first();
+
         /*
         |--------------------------------------------------------------------------
-        | Statistik Master
+        | Statistik
         |--------------------------------------------------------------------------
         */
 
         $totalSiswa = Siswa::count();
-        $totalGuru  = Guru::where('aktif', true)->count();
-        $totalKelas = Kelas::count();
 
-        /*
-        |--------------------------------------------------------------------------
-        | Tahun Ajaran Aktif
-        |--------------------------------------------------------------------------
-        */
+        $totalGuru = Guru::count();
 
-        $tahunAjaran = TahunAjaran::where('aktif', true)->first();
+        $totalKelas = \App\Models\Kelas::count();
 
-        /*
-        |--------------------------------------------------------------------------
-        | Statistik Presensi Hari Ini
-        |--------------------------------------------------------------------------
-        */
+        $belumPresensiHariIni = $totalSiswa - $totalScanHariIni;
 
-        $hariIni = Carbon::today();
+        $presensiHariIni = Presensi::whereDate('tanggal', today());
 
-        $hadirHariIni = Presensi::whereDate('tanggal', $hariIni)
+        $hadirHariIni = (clone $presensiHariIni)
             ->where('status', 'Hadir')
             ->count();
 
-        $terlambatHariIni = Presensi::whereDate('tanggal', $hariIni)
+        $terlambatHariIni = (clone $presensiHariIni)
             ->where('status', 'Terlambat')
             ->count();
 
-        $izinHariIni = Presensi::whereDate('tanggal', $hariIni)
+        $izinHariIni = (clone $presensiHariIni)
             ->where('status', 'Izin')
             ->count();
 
-        $sakitHariIni = Presensi::whereDate('tanggal', $hariIni)
+        $sakitHariIni = (clone $presensiHariIni)
             ->where('status', 'Sakit')
             ->count();
 
-        $alphaHariIni = Presensi::whereDate('tanggal', $hariIni)
+        $alphaHariIni = (clone $presensiHariIni)
             ->where('status', 'Alpha')
             ->count();
 
-        $presensiHariIni = Presensi::whereDate('tanggal', $hariIni)->count();
+        $totalScanHariIni = (clone $presensiHariIni)->count();
 
         /*
         |--------------------------------------------------------------------------
-        | Riwayat Scan Terbaru
+        | Presensi Terbaru
         |--------------------------------------------------------------------------
         */
 
-        $presensiTerbaru = Presensi::with([
+        $presensiTerakhir = Presensi::with([
                 'siswa.kelas',
-                'guru'
+                'scanner',
             ])
             ->latest()
             ->take(10)
             ->get();
 
+        $presensiTerbaru = $presensiTerakhir->first();
+
         /*
         |--------------------------------------------------------------------------
-        | Kirim ke View
+        | Grafik 7 Hari (Tahap 35)
         |--------------------------------------------------------------------------
         */
 
-        return view('dashboard.index', compact(
-            'totalSiswa',
-            'totalGuru',
-            'totalKelas',
-            'tahunAjaran',
+        $grafikMingguan = Presensi::select(
+                DB::raw('DATE(tanggal) as tanggal'),
+                DB::raw('COUNT(*) as total')
+            )
+            ->whereDate('tanggal', '>=', Carbon::now()->subDays(6))
+            ->groupBy('tanggal')
+            ->orderBy('tanggal')
+            ->get();
 
-            'presensiHariIni',
+        return view('dashboard', compact(
+
+            'pengaturan',
+
+            'totalSiswa',
+
+            'totalGuru',
+
+            'totalKelas'
+
             'hadirHariIni',
+
             'terlambatHariIni',
+
             'izinHariIni',
+
             'sakitHariIni',
+
             'alphaHariIni',
 
-            'presensiTerbaru'
+            'totalScanHariIni',
+
+            'belumPresensiHariIni'
+
+            'presensiTerakhir',
+
+            'presensiTerbaru',
+
+            'grafikMingguan'
+
         ));
     }
 }

@@ -56,7 +56,7 @@
 
     <div>
 
-        <a href="#" class="btn btn-outline-success">
+        <a href="{{ route('siswa.import.template') }}" class="btn btn-outline-success">
 
             <i class="fa-solid fa-download"></i>
 
@@ -133,7 +133,7 @@
                     <li>Tanggal Lahir (YYYY-MM-DD)</li>
                     <li>Jenis Kelamin (L / P)</li>
                     <li>Alamat</li>
-                    <li>Kelas (7A, 7B, 8A, 9C, dst)</li>
+                    <li>Kelas (7A, 7B, 8A, 9A, dst)</li>
 
                 </ol>
 

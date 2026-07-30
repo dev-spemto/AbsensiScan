@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use App\Helpers\ActivityHelper;
 
 class GuruController extends Controller
 {
@@ -23,7 +24,6 @@ class GuruController extends Controller
         return view('guru.index', compact('gurus'));
     }
 
-
     /**
      * Form Tambah Guru
      */
@@ -31,7 +31,6 @@ class GuruController extends Controller
     {
         return view('guru.create');
     }
-
 
     /**
      * Simpan Guru
@@ -74,9 +73,7 @@ class GuruController extends Controller
 
         ]);
 
-
         $foto = null;
-
 
         if ($request->hasFile('foto')) {
 
@@ -84,7 +81,6 @@ class GuruController extends Controller
                 ->store('guru', 'public');
 
         }
-
 
         // Buat akun login
         $user = User::create([
@@ -101,9 +97,8 @@ class GuruController extends Controller
 
         ]);
 
-
         // Buat profil guru
-        Guru::create([
+        $guru = Guru::create([
 
             'user_id' => $user->id,
 
@@ -129,12 +124,16 @@ class GuruController extends Controller
 
         ]);
 
-
+        ActivityHelper::log(
+            'Tambah Data',
+            'Guru',
+            'Menambahkan guru: '.$request->nama
+        );
+        
         return redirect()
             ->route('guru.index')
             ->with('success', 'Data guru berhasil ditambahkan.');
     }
-
 
     /**
      * Detail Guru
@@ -146,7 +145,6 @@ class GuruController extends Controller
         return view('guru.show', compact('guru'));
     }
 
-
     /**
      * Form Edit Guru
      */
@@ -156,7 +154,6 @@ class GuruController extends Controller
 
         return view('guru.edit', compact('guru'));
     }
-
 
     /**
      * Update Guru
@@ -197,12 +194,9 @@ class GuruController extends Controller
 
         ]);
 
-
         $foto = $guru->foto;
 
-
         if ($request->hasFile('foto')) {
-
 
             if ($foto && Storage::disk('public')->exists($foto)) {
 
@@ -210,12 +204,10 @@ class GuruController extends Controller
 
             }
 
-
             $foto = $request->file('foto')
                 ->store('guru', 'public');
 
         }
-
 
         // Update profil guru
         $guru->update([
@@ -242,7 +234,6 @@ class GuruController extends Controller
 
         ]);
 
-
         // Update akun user
         $guru->user->update([
 
@@ -254,7 +245,6 @@ class GuruController extends Controller
 
         ]);
 
-
         if ($request->filled('password')) {
 
             $guru->user->update([
@@ -265,37 +255,59 @@ class GuruController extends Controller
 
         }
 
-
+        ActivityHelper::log(
+            'Edit Data',
+            'Guru',
+            'Mengubah data guru: '.$guru->nama
+        );
+        
         return redirect()
             ->route('guru.index')
             ->with('success', 'Data guru berhasil diperbarui.');
     }
-
 
     /**
      * Hapus Guru
      */
     public function destroy(Guru $guru)
     {
+        // Jangan hapus akun yang sedang login
+        if (
+            $guru->user &&
+            auth()->id() == $guru->user->id
+        ) {
 
-        if ($guru->foto && Storage::disk('public')->exists($guru->foto)) {
+            return back()->with(
+                'error',
+                'Anda tidak dapat menghapus akun yang sedang digunakan.'
+            );
+
+        }
+
+        $namaGuru = $guru->nama;
+
+        if (
+            $guru->foto &&
+            Storage::disk('public')->exists($guru->foto)
+        ) {
 
             Storage::disk('public')->delete($guru->foto);
 
         }
 
-
-        // Hapus akun login
         if ($guru->user) {
 
             $guru->user->delete();
 
         }
 
-
-        // Hapus data guru
         $guru->delete();
 
+        ActivityHelper::log(
+            'Hapus Data',
+            'Guru',
+            'Menghapus guru: '.$namaGuru
+        );
 
         return redirect()
             ->route('guru.index')

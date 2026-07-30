@@ -66,11 +66,7 @@
 
                 </h3>
 
-                <small>
-
-                    Hadir
-
-                </small>
+                <small>Hadir</small>
 
             </div>
 
@@ -90,11 +86,7 @@
 
                 </h3>
 
-                <small>
-
-                    Terlambat
-
-                </small>
+                <small>Terlambat</small>
 
             </div>
 
@@ -114,11 +106,7 @@
 
                 </h3>
 
-                <small>
-
-                    Izin
-
-                </small>
+                <small>Izin</small>
 
             </div>
 
@@ -138,11 +126,7 @@
 
                 </h3>
 
-                <small>
-
-                    Sakit
-
-                </small>
+                <small>Sakit</small>
 
             </div>
 
@@ -162,11 +146,7 @@
 
                 </h3>
 
-                <small>
-
-                    Alpha
-
-                </small>
+                <small>Alpha</small>
 
             </div>
 
@@ -196,11 +176,7 @@
 
                 <div class="col-md-3 mb-3">
 
-                    <label class="form-label">
-
-                        Tanggal
-
-                    </label>
+                    <label class="form-label">Tanggal</label>
 
                     <input
                         type="date"
@@ -212,21 +188,35 @@
 
                 <div class="col-md-3 mb-3">
 
-                    <label class="form-label">
+                    <label class="form-label">Bulan</label>
 
-                        Kelas
+                    <select name="bulan" class="form-select">
 
-                    </label>
+                        <option value="">Semua Bulan</option>
 
-                    <select
-                        name="kelas"
-                        class="form-select">
+                        @for($i=1;$i<=12;$i++)
 
-                        <option value="">
+                            <option
+                                value="{{ $i }}"
+                                {{ request('bulan')==$i ? 'selected' : '' }}>
 
-                            Semua Kelas
+                                {{ DateTime::createFromFormat('!m',$i)->format('F') }}
 
-                        </option>
+                            </option>
+
+                        @endfor
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-3 mb-3">
+
+                    <label class="form-label">Kelas</label>
+
+                    <select name="kelas" class="form-select">
+
+                        <option value="">Semua Kelas</option>
 
                         @foreach($kelas as $k)
 
@@ -246,21 +236,35 @@
 
                 <div class="col-md-3 mb-3">
 
-                    <label class="form-label">
+                    <label class="form-label">Siswa</label>
 
-                        Guru
+                    <select name="siswa" class="form-select">
 
-                    </label>
+                        <option value="">Semua Siswa</option>
 
-                    <select
-                        name="guru"
-                        class="form-select">
+                        @foreach($siswas as $siswa)
 
-                        <option value="">
+                            <option
+                                value="{{ $siswa->id }}"
+                                {{ request('siswa')==$siswa->id ? 'selected':'' }}>
 
-                            Semua Guru
+                                {{ $siswa->nama }}
 
-                        </option>
+                            </option>
+
+                        @endforeach
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-3 mb-3">
+
+                    <label class="form-label">Guru</label>
+
+                    <select name="guru" class="form-select">
+
+                        <option value="">Semua Guru</option>
 
                         @foreach($gurus as $guru)
 
@@ -280,27 +284,105 @@
 
                 <div class="col-md-3 mb-3">
 
-                    <label class="form-label">
+                    <label class="form-label">Petugas Scan</label>
 
-                        Status
+                    <select name="scanner" class="form-select">
 
-                    </label>
+                        <option value="">Semua Petugas</option>
 
-                    <select
-                        name="status"
-                        class="form-select">
+                        @foreach($scanners as $user)
+
+                            <option
+                                value="{{ $user->id }}"
+                                {{ request('scanner')==$user->id ? 'selected':'' }}>
+
+                                {{ $user->nama }}
+
+                            </option>
+
+                        @endforeach
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-3 mb-3">
+
+                    <label class="form-label">Scan Oleh</label>
+
+                    <select name="scan_by" class="form-select">
 
                         <option value="">Semua</option>
 
-                        <option value="Hadir" {{ request('status')=='Hadir' ? 'selected' : '' }}>Hadir</option>
+                        <option value="admin" {{ request('scan_by')=='admin' ? 'selected':'' }}>Admin</option>
 
-                        <option value="Terlambat" {{ request('status')=='Terlambat' ? 'selected' : '' }}>Terlambat</option>
+                        <option value="guru" {{ request('scan_by')=='guru' ? 'selected':'' }}>Guru</option>
 
-                        <option value="Izin" {{ request('status')=='Izin' ? 'selected' : '' }}>Izin</option>
+                        <option value="ketua_kelas" {{ request('scan_by')=='ketua_kelas' ? 'selected':'' }}>Ketua Kelas</option>
 
-                        <option value="Sakit" {{ request('status')=='Sakit' ? 'selected' : '' }}>Sakit</option>
+                        <option value="sekretaris" {{ request('scan_by')=='sekretaris' ? 'selected':'' }}>Sekretaris</option>
 
-                        <option value="Alpha" {{ request('status')=='Alpha' ? 'selected' : '' }}>Alpha</option>
+                    </select>
+
+                </div>
+
+                <div class="col-md-3 mb-3">
+
+                    <label class="form-label">Status</label>
+
+                    <select name="status" class="form-select">
+
+                        <option value="">Semua</option>
+
+                        <option value="Hadir" {{ request('status')=='Hadir' ? 'selected':'' }}>Hadir</option>
+
+                        <option value="Terlambat" {{ request('status')=='Terlambat' ? 'selected':'' }}>Terlambat</option>
+
+                        <option value="Izin" {{ request('status')=='Izin' ? 'selected':'' }}>Izin</option>
+
+                        <option value="Sakit" {{ request('status')=='Sakit' ? 'selected':'' }}>Sakit</option>
+
+                        <option value="Alpha" {{ request('status')=='Alpha' ? 'selected':'' }}>Alpha</option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-3 mb-3">
+
+                    <label class="form-label">Metode</label>
+
+                    <select name="metode" class="form-select">
+
+                        <option value="">Semua Metode</option>
+
+                        <option value="Barcode" {{ request('metode')=='Barcode' ? 'selected':'' }}>Barcode</option>
+
+                        <option value="Manual" {{ request('metode')=='Manual' ? 'selected':'' }}>Manual</option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-3 mb-3">
+
+                    <label class="form-label">Tahun Ajaran</label>
+
+                    <select name="tahun_ajaran" class="form-select">
+
+                        <option value="">Semua Tahun Ajaran</option>
+
+                        @foreach($tahunAjarans as $ta)
+
+                            <option
+                                value="{{ $ta->id }}"
+                                {{ request('tahun_ajaran')==$ta->id ? 'selected':'' }}>
+
+                                {{ $ta->nama }}
+
+                            </option>
+
+                        @endforeach
 
                     </select>
 
@@ -311,48 +393,28 @@
             <div class="d-flex flex-wrap gap-2">
 
                 <button class="btn btn-success">
-
                     <i class="fa-solid fa-magnifying-glass"></i>
-
                     Tampilkan
-
                 </button>
 
-                <a href="{{ route('rekap.index') }}"
-                   class="btn btn-secondary">
-
+                <a href="{{ route('rekap.index') }}" class="btn btn-secondary">
                     <i class="fa-solid fa-rotate-left"></i>
-
                     Reset
-
                 </a>
 
-                <a href="{{ route('rekap.export.excel', request()->query()) }}"
-                   class="btn btn-success">
-
+                <a href="{{ route('rekap.export.excel', request()->query()) }}" class="btn btn-success">
                     <i class="fa-solid fa-file-excel"></i>
-
                     Export Excel
-
                 </a>
 
-                <a href="{{ route('rekap.export.pdf', request()->query()) }}"
-                   class="btn btn-danger">
-
+                <a href="{{ route('rekap.export.pdf', request()->query()) }}" class="btn btn-danger">
                     <i class="fa-solid fa-file-pdf"></i>
-
                     Export PDF
-
                 </a>
 
-                <a href="{{ route('rekap.print', request()->query()) }}"
-                   target="_blank"
-                   class="btn btn-dark">
-
+                <a href="{{ route('rekap.print', request()->query()) }}" target="_blank" class="btn btn-dark">
                     <i class="fa-solid fa-print"></i>
-
                     Print
-
                 </a>
 
             </div>
@@ -383,19 +445,25 @@
 
                 <tr>
 
-                    <th>No</th>
+                    <th width="60">No</th>
 
                     <th>Tanggal</th>
 
                     <th>Jam</th>
 
-                    <th>Nama</th>
+                    <th>Siswa</th>
 
                     <th>Kelas</th>
 
-                    <th>Guru</th>
-
                     <th>Status</th>
+
+                    <th>Petugas Scan</th>
+
+                    <th>Role</th>
+
+                    <th>Guru Mapel</th>
+
+                    <th>Metode</th>
 
                 </tr>
 
@@ -403,91 +471,184 @@
 
             <tbody>
 
-                @php
+            @php
 
-                    $warna = [
+                $warna = [
 
-                        'Hadir' => 'success',
-                        'Terlambat' => 'warning',
-                        'Izin' => 'primary',
-                        'Sakit' => 'info',
-                        'Alpha' => 'danger',
+                    'Hadir'     => 'success',
 
-                    ];
+                    'Terlambat' => 'warning',
 
-                @endphp
+                    'Izin'      => 'primary',
 
-                @forelse($presensis as $index => $presensi)
+                    'Sakit'     => 'info',
 
-                    <tr>
+                    'Alpha'     => 'danger',
 
-                        <td>
+                ];
 
-                            {{ $presensis->firstItem() + $index }}
+                $roleColor = [
 
-                        </td>
+                    'admin'        => 'danger',
 
-                        <td>
+                    'guru'         => 'success',
 
-                            {{ \Carbon\Carbon::parse($presensi->tanggal)->format('d-m-Y') }}
+                    'ketua_kelas'  => 'primary',
 
-                        </td>
+                    'sekretaris'   => 'warning',
 
-                        <td>
+                ];
 
-                            {{ substr($presensi->jam_scan,0,5) }}
+                $roleText = [
 
-                        </td>
+                    'admin'        => 'Admin',
 
-                        <td>
+                    'guru'         => 'Guru',
 
-                            {{ $presensi->siswa->nama }}
+                    'ketua_kelas'  => 'Ketua Kelas',
 
-                        </td>
+                    'sekretaris'   => 'Sekretaris',
 
-                        <td>
+                ];
 
-                            {{ $presensi->siswa->kelas->nama_lengkap }}
+                $metodeColor = [
 
-                        </td>
+                    'Barcode' => 'success',
 
-                        <td>
+                    'Manual'  => 'secondary',
 
-                            {{ $presensi->guru->nama }}
+                ];
 
-                        </td>
+            @endphp
 
-                        <td>
+            @forelse($presensis as $index => $presensi)
 
-                            <span class="badge bg-{{ $warna[$presensi->status] ?? 'secondary' }}">
+            <tr>
 
-                                {{ $presensi->status }}
+                <td>
 
-                            </span>
+                    {{ $presensis->firstItem() + $index }}
 
-                        </td>
+                </td>
 
-                    </tr>
+                <td>
 
-                @empty
+                    {{ \Carbon\Carbon::parse($presensi->tanggal)->format('d-m-Y') }}
 
-                    <tr>
+                </td>
 
-                        <td colspan="7" class="text-center py-5 text-muted">
+                <td>
 
-                            <i class="fa-solid fa-folder-open fa-2x mb-3"></i>
+                    {{ substr($presensi->jam_scan,0,5) }}
 
-                            <br>
+                </td>
 
-                            Belum ada data presensi.
+                <td>
 
-                        </td>
+                    <div class="d-flex align-items-center">
 
-                    </tr>
+                        <img
+                            src="{{ $presensi->siswa->foto
+                                ? asset('storage/'.$presensi->siswa->foto)
+                                : 'https://ui-avatars.com/api/?name='.urlencode($presensi->siswa->nama) }}"
+                            width="45"
+                            height="45"
+                            class="rounded-circle border me-2"
+                            style="object-fit:cover;">
 
-                @endforelse
+                        <div>
 
-            </tbody>
+                            <div class="fw-semibold">
+
+                                {{ $presensi->siswa->nama }}
+
+                            </div>
+
+                            <small class="text-muted">
+
+                                {{ $presensi->siswa->nisn }}
+
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                </td>
+
+                <td>
+
+                    {{ optional($presensi->siswa->kelas)->nama_lengkap }}
+
+                </td>
+
+                <td>
+
+                    <span class="badge bg-{{ $warna[$presensi->status] ?? 'secondary' }}">
+
+                        {{ $presensi->status }}
+
+                    </span>
+
+                </td>
+
+                <td>
+
+                    {{ optional($presensi->scanner)->nama ?? '-' }}
+
+                </td>
+
+                <td>
+
+                    <span class="badge bg-{{ $roleColor[$presensi->scan_by] ?? 'secondary' }}">
+
+                        {{ $roleText[$presensi->scan_by] ?? '-' }}
+
+                    </span>
+
+                </td>
+
+                <td>
+
+                    {{ optional($presensi->guru)->nama ?? '-' }}
+
+                </td>
+
+                <td>
+
+                    <span class="badge bg-{{ $metodeColor[$presensi->metode] ?? 'dark' }}">
+
+                        {{ $presensi->metode }}
+
+                    </span>
+
+                </td>
+
+            </tr>
+
+            @empty
+
+            <tr>
+
+                <td colspan="10" class="text-center py-5">
+
+                    <i class="fa-solid fa-calendar-xmark fa-3x text-secondary mb-3"></i>
+
+                    <br>
+
+                    <span class="text-muted">
+
+                        Belum ada data presensi.
+
+                    </span>
+
+                </td>
+
+            </tr>
+
+            @endforelse
+
+                        </tbody>
 
         </table>
 
@@ -495,13 +656,153 @@
 
     @if($presensis->hasPages())
 
-        <div class="card-footer bg-white">
+    <div class="card-footer bg-white">
 
-            {{ $presensis->links() }}
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+
+            <small class="text-muted">
+
+                Menampilkan
+
+                {{ $presensis->firstItem() }}
+
+                -
+
+                {{ $presensis->lastItem() }}
+
+                dari
+
+                {{ $presensis->total() }}
+
+                data
+
+            </small>
+
+            <div>
+
+                {{ $presensis->withQueryString()->links() }}
+
+            </div>
 
         </div>
 
+    </div>
+
     @endif
+
+</div>
+
+{{-- Informasi --}}
+
+<div class="card border-0 shadow-sm mt-4">
+
+    <div class="card-header bg-light">
+
+        <i class="fa-solid fa-circle-info text-success"></i>
+
+        Informasi Rekap Presensi
+
+    </div>
+
+    <div class="card-body">
+
+        <div class="row g-3">
+
+            <div class="col-lg-3 col-md-6">
+
+                <div class="border rounded-3 p-3 h-100">
+
+                    <div class="fw-bold text-success mb-2">
+
+                        <i class="fa-solid fa-barcode"></i>
+
+                        Barcode
+
+                    </div>
+
+                    <small class="text-muted">
+
+                        Presensi menggunakan barcode/NISN sehingga proses
+                        pencatatan lebih cepat dan meminimalkan kesalahan input.
+
+                    </small>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+
+                <div class="border rounded-3 p-3 h-100">
+
+                    <div class="fw-bold text-primary mb-2">
+
+                        <i class="fa-solid fa-user-check"></i>
+
+                        Status
+
+                    </div>
+
+                    <small class="text-muted">
+
+                        Rekap menampilkan status Hadir, Terlambat, Izin,
+                        Sakit maupun Alpha sesuai hasil presensi.
+
+                    </small>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+
+                <div class="border rounded-3 p-3 h-100">
+
+                    <div class="fw-bold text-warning mb-2">
+
+                        <i class="fa-solid fa-user-shield"></i>
+
+                        Petugas Scan
+
+                    </div>
+
+                    <small class="text-muted">
+
+                        Setiap transaksi menyimpan informasi petugas yang
+                        melakukan scan beserta hak aksesnya.
+
+                    </small>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+
+                <div class="border rounded-3 p-3 h-100">
+
+                    <div class="fw-bold text-danger mb-2">
+
+                        <i class="fa-solid fa-file-export"></i>
+
+                        Export
+
+                    </div>
+
+                    <small class="text-muted">
+
+                        Hasil rekap sesuai filter dapat langsung diekspor
+                        ke Excel, PDF ataupun dicetak.
+
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
 

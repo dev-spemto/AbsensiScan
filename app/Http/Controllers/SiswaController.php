@@ -7,6 +7,9 @@ use App\Models\Siswa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use App\Helpers\ActivityHelper;
 
 class SiswaController extends Controller
 {
@@ -48,6 +51,7 @@ class SiswaController extends Controller
             'jenis_kelamin'   => 'required|in:L,P',
             'alamat'          => 'required',
             'kelas_id'        => 'required|exists:kelas,id',
+            'jabatan'         => 'nullable|in:Ketua Kelas,Sekretaris',
             'foto'            => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'aktif'           => 'required|boolean',
         ]);
@@ -58,7 +62,7 @@ class SiswaController extends Controller
             $foto = $request->file('foto')->store('siswa', 'public');
         }
 
-        Siswa::create([
+        $siswa = Siswa::create([
             'nis'             => $request->nis,
             'nisn'            => $request->nisn,
             'barcode'         => $request->nisn,
@@ -68,9 +72,38 @@ class SiswaController extends Controller
             'jenis_kelamin'   => $request->jenis_kelamin,
             'alamat'          => $request->alamat,
             'kelas_id'        => $request->kelas_id,
+            'jabatan'         => $request->jabatan,
             'foto'            => $foto,
             'aktif'           => $request->aktif,
         ]);
+
+        if ($request->filled('jabatan')) {
+
+            User::updateOrCreate(
+
+                [
+                    'siswa_id' => $siswa->id,
+                ],
+
+                [
+                    'nama'      => $siswa->nama,
+                    'username'  => $siswa->nisn,
+                    'password'  => Hash::make(date('dmY', strtotime($siswa->tanggal_lahir))),
+                    'role'      => $request->jabatan == 'Ketua Kelas'
+                                        ? 'ketua_kelas'
+                                        : 'sekretaris',
+                    'aktif'     => true,
+                ]
+
+            );
+
+        }
+
+        ActivityHelper::log(
+            'Tambah Data',
+            'Siswa',
+            'Menambahkan siswa: '.$siswa->nama
+        );
 
         return redirect()
             ->route('siswa.index')
@@ -121,6 +154,7 @@ class SiswaController extends Controller
             'jenis_kelamin'   => 'required|in:L,P',
             'alamat'          => 'required',
             'kelas_id'        => 'required|exists:kelas,id',
+            'jabatan'         => 'nullable|in:Ketua Kelas,Sekretaris',
             'foto'            => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'aktif'           => 'required|boolean',
         ]);
@@ -146,10 +180,48 @@ class SiswaController extends Controller
             'jenis_kelamin'   => $request->jenis_kelamin,
             'alamat'          => $request->alamat,
             'kelas_id'        => $request->kelas_id,
+            'jabatan'         => $request->jabatan,
             'foto'            => $foto,
             'aktif'           => $request->aktif,
         ]);
 
+        $user = User::where('siswa_id', $siswa->id)->first();
+
+        if ($request->filled('jabatan')) {
+
+            User::updateOrCreate(
+
+                [
+                    'siswa_id' => $siswa->id,
+                ],
+
+                [
+                    'nama'      => $siswa->nama,
+                    'username'  => $siswa->nisn,
+                    'password'  => $user
+                                        ? $user->password
+                                        : Hash::make(date('dmY', strtotime($siswa->tanggal_lahir))),
+                    'role'      => $request->jabatan == 'Ketua Kelas'
+                                        ? 'ketua_kelas'
+                                        : 'sekretaris',
+                    'aktif'     => true,
+                ]
+
+            );
+
+        } else {
+
+            if ($user) {
+                $user->delete();
+            }
+
+        }
+
+        ActivityLogService::store(
+            "Mengubah data siswa: {$siswa->nama}",
+            "Data Siswa"
+        );
+        
         return redirect()
             ->route('siswa.index')
             ->with('success', 'Data siswa berhasil diperbarui.');
@@ -160,12 +232,36 @@ class SiswaController extends Controller
      */
     public function destroy(Siswa $siswa)
     {
+        $namaSiswa = $siswa->nama;
+        if (
+            $siswa->ketuaPengurus ||
+            $siswa->wakilPengurus ||
+            $siswa->sekretarisPengurus
+        ) {
+
+            return back()->with(
+                'error',
+                'Siswa masih menjadi pengurus kelas.'
+            );
+
+        }
+
         if ($siswa->foto && Storage::disk('public')->exists($siswa->foto)) {
             Storage::disk('public')->delete($siswa->foto);
         }
 
+        User::where('siswa_id', $siswa->id)->delete();
+
         $siswa->delete();
 
+        ActivityHelper::log(
+            'Hapus Data',
+            'Siswa',
+            'Menghapus siswa: '.$namaSiswa
+        );
+
+        $siswa->delete();
+        
         return redirect()
             ->route('siswa.index')
             ->with('success', 'Data siswa berhasil dihapus.');

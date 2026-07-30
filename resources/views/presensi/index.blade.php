@@ -10,7 +10,7 @@ $statusColor = [
     'Hadir' => 'success',
     'Terlambat' => 'warning',
     'Izin' => 'primary',
-    'Sakit' => 'info',
+    'Sakit' => 'purple',
     'Alpha' => 'danger',
 ];
 
@@ -377,13 +377,15 @@ $statusColor = [
 
             <i class="fa-solid fa-table"></i>
 
-            Riwayat Presensi
+            Hasil Rekap Presensi
 
         </div>
 
-        <span class="badge bg-light text-dark">
+        <span class="badge bg-light text-success">
 
-            {{ $presensis->total() }} Data
+            Total :
+            {{ $presensis->total() }}
+            Data
 
         </span>
 
@@ -399,25 +401,25 @@ $statusColor = [
 
                     <th width="60">No</th>
 
-                    <th>Tanggal</th>
+                    <th width="95">Tanggal</th>
 
-                    <th>Jam</th>
+                    <th width="70">Jam</th>
 
-                    <th>Nama</th>
+                    <th width="260">Siswa</th>
 
                     <th>Kelas</th>
 
-                    <th>Guru</th>
-
                     <th>Status</th>
+
+                    <th>Petugas Scan</th>
+
+                    <th>Role</th>
+
+                    <th>Guru</th>
 
                     <th>Metode</th>
 
-                    <th width="170" class="text-center">
-
-                        Aksi
-
-                    </th>
+                    <th width="120">Device</th>
 
                 </tr>
 
@@ -425,7 +427,39 @@ $statusColor = [
 
             <tbody>
 
-            @forelse($presensis as $index => $presensi)
+                @php
+
+                    $warna = [
+
+                        'Hadir'      => 'success',
+
+                        'Terlambat'  => 'warning',
+
+                        'Izin'       => 'primary',
+
+                        'Sakit'      => 'info',
+
+                        'Alpha'      => 'danger',
+
+                    ];
+
+                    $roleColor = [
+
+                        'admin'         => 'danger',
+
+                        'guru'          => 'success',
+
+                        'ketua_kelas'   => 'primary',
+
+                        'sekretaris'    => 'warning',
+
+                    ];
+
+                @endphp
+
+            <tbody>
+
+@forelse($presensis as $index => $presensi)
 
 <tr>
 
@@ -451,13 +485,19 @@ $statusColor = [
 
         <div class="d-flex align-items-center">
 
-            <img src="{{ $presensi->siswa->foto
-                ? asset('storage/'.$presensi->siswa->foto)
-                : 'https://ui-avatars.com/api/?name='.urlencode($presensi->siswa->nama) }}"
-                 width="40"
-                 height="40"
-                 class="rounded-circle me-2"
-                 style="object-fit:cover;">
+            <img
+
+                src="{{ $presensi->siswa->foto
+                    ? asset('storage/'.$presensi->siswa->foto)
+                    : 'https://ui-avatars.com/api/?name='.urlencode($presensi->siswa->nama) }}"
+
+                width="45"
+
+                height="45"
+
+                class="rounded-circle border me-2"
+
+                style="object-fit:cover;">
 
             <div>
 
@@ -469,6 +509,7 @@ $statusColor = [
 
                 <small class="text-muted">
 
+                    NISN :
                     {{ $presensi->siswa->nisn }}
 
                 </small>
@@ -481,23 +522,39 @@ $statusColor = [
 
     <td>
 
-        {{ $presensi->siswa->kelas->nama_lengkap }}
+        {{ optional($presensi->siswa->kelas)->nama_lengkap }}
 
     </td>
 
     <td>
 
-        {{ $presensi->guru->nama }}
-
-    </td>
-
-    <td>
-
-        <span class="badge bg-{{ $statusColor[$presensi->status] ?? 'secondary' }}">
+        <span class="badge bg-{{ $warna[$presensi->status] ?? 'secondary' }}">
 
             {{ $presensi->status }}
 
         </span>
+
+    </td>
+
+    <td>
+
+        {{ optional($presensi->scanner)->nama ?? '-' }}
+
+    </td>
+
+    <td>
+
+        <span class="badge bg-{{ $roleColor[$presensi->scan_by] ?? 'secondary' }}">
+
+            {{ ucwords(str_replace('_',' ',$presensi->scan_by)) }}
+
+        </span>
+
+    </td>
+
+    <td>
+
+        {{ optional($presensi->guru)->nama ?? '-' }}
 
     </td>
 
@@ -511,45 +568,13 @@ $statusColor = [
 
     </td>
 
-    <td class="text-center">
+    <td>
 
-        <div class="btn-group">
+        <small>
 
-            <a href="{{ route('presensi.show',$presensi) }}"
-               class="btn btn-sm btn-outline-primary">
+            {{ \Illuminate\Support\Str::limit($presensi->device_name,20) }}
 
-                <i class="fa-solid fa-eye"></i>
-
-            </a>
-
-            @if(auth()->user()->isAdmin())
-
-            <a href="{{ route('presensi.edit',$presensi) }}"
-               class="btn btn-sm btn-outline-warning">
-
-                <i class="fa-solid fa-pen"></i>
-
-            </a>
-
-            <form action="{{ route('presensi.destroy',$presensi) }}"
-                  method="POST"
-                  class="d-inline"
-                  onsubmit="return confirm('Yakin ingin menghapus data presensi ini?')">
-
-                @csrf
-                @method('DELETE')
-
-                <button class="btn btn-sm btn-outline-danger">
-
-                    <i class="fa-solid fa-trash"></i>
-
-                </button>
-
-            </form>
-
-            @endif
-
-        </div>
+        </small>
 
     </td>
 
@@ -559,7 +584,7 @@ $statusColor = [
 
 <tr>
 
-    <td colspan="9" class="text-center py-5">
+    <td colspan="11" class="text-center py-5">
 
         <i class="fa-solid fa-calendar-xmark fa-3x text-secondary mb-3"></i>
 
@@ -583,41 +608,41 @@ $statusColor = [
 
     </div>
 
-    @if($presensis->hasPages())
+@if($presensis->hasPages())
 
-    <div class="card-footer bg-white">
+<div class="card-footer bg-white">
 
-        <div class="d-flex justify-content-between align-items-center flex-wrap">
+    <div class="d-flex justify-content-between align-items-center flex-wrap">
 
-            <small class="text-muted">
+        <small class="text-muted">
 
-                Menampilkan
+            Menampilkan
 
-                {{ $presensis->firstItem() }}
+            {{ $presensis->firstItem() }}
 
-                -
+            -
 
-                {{ $presensis->lastItem() }}
+            {{ $presensis->lastItem() }}
 
-                dari
+            dari
 
-                {{ $presensis->total() }}
+            {{ $presensis->total() }}
 
-                data
+            data
 
-            </small>
+        </small>
 
-            <div>
+        <div>
 
-                {{ $presensis->withQueryString()->links() }}
-
-            </div>
+            {{ $presensis->withQueryString()->links() }}
 
         </div>
 
     </div>
 
-    @endif
+</div>
+
+@endif
 
 </div>
 
@@ -627,30 +652,29 @@ $statusColor = [
 
         <i class="fa-solid fa-circle-info text-success"></i>
 
-        Informasi
+        Informasi Rekap
 
     </div>
 
     <div class="card-body">
 
-        <div class="row">
+        <div class="row g-3">
 
-            <div class="col-md-4">
+            <div class="col-lg-3">
 
                 <div class="border rounded p-3 h-100">
 
-                    <div class="fw-bold text-success mb-2">
+                    <h6 class="text-success">
 
                         <i class="fa-solid fa-barcode"></i>
 
-                        Scan Barcode
+                        Metode
 
-                    </div>
+                    </h6>
 
                     <small class="text-muted">
 
-                        Digunakan untuk mencatat kehadiran siswa melalui
-                        barcode kartu identitas.
+                        Menampilkan metode presensi yang digunakan oleh siswa.
 
                     </small>
 
@@ -658,22 +682,21 @@ $statusColor = [
 
             </div>
 
-            <div class="col-md-4">
+            <div class="col-lg-3">
 
                 <div class="border rounded p-3 h-100">
 
-                    <div class="fw-bold text-primary mb-2">
+                    <h6 class="text-primary">
 
                         <i class="fa-solid fa-user-check"></i>
 
-                        Status Presensi
+                        Petugas
 
-                    </div>
+                    </h6>
 
                     <small class="text-muted">
 
-                        Status akan ditampilkan sesuai hasil presensi
-                        (Hadir, Terlambat, Izin, Sakit, atau Alpha).
+                        Menampilkan siapa yang melakukan proses scan.
 
                     </small>
 
@@ -681,23 +704,43 @@ $statusColor = [
 
             </div>
 
-            <div class="col-md-4">
+            <div class="col-lg-3">
 
                 <div class="border rounded p-3 h-100">
 
-                    <div class="fw-bold text-danger mb-2">
+                    <h6 class="text-warning">
 
-                        <i class="fa-solid fa-shield-halved"></i>
+                        <i class="fa-solid fa-user-shield"></i>
 
-                        Hak Akses
+                        Role
 
-                    </div>
+                    </h6>
 
                     <small class="text-muted">
 
-                        Guru hanya dapat melihat data,
-                        sedangkan Administrator dapat mengubah
-                        dan menghapus data presensi.
+                        Admin, Guru, Ketua Kelas, maupun Sekretaris.
+
+                    </small>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-3">
+
+                <div class="border rounded p-3 h-100">
+
+                    <h6 class="text-danger">
+
+                        <i class="fa-solid fa-laptop"></i>
+
+                        Device
+
+                    </h6>
+
+                    <small class="text-muted">
+
+                        Menampilkan perangkat yang digunakan saat melakukan scan.
 
                     </small>
 

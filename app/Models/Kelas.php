@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Kelas extends Model
 {
@@ -20,6 +21,11 @@ class Kelas extends Model
     public function siswas(): HasMany
     {
         return $this->hasMany(Siswa::class);
+    }
+
+    public function pengurus(): HasOne
+    {
+        return $this->hasOne(PengurusKelas::class);
     }
 
     /**

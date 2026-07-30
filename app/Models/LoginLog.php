@@ -1,0 +1,42 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class LoginLog extends Model
+{
+    protected $fillable = [
+
+        'user_id',
+
+        'nama',
+
+        'username',
+
+        'role',
+
+        'ip_address',
+
+        'user_agent',
+
+        'status',
+
+        'login_at',
+
+    ];
+
+    protected $casts = [
+
+        'login_at' => 'datetime',
+
+    ];
+
+    /**
+     * Relasi ke User
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}

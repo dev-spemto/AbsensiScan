@@ -88,6 +88,10 @@ Presensi Siswa
 
 </div>
 
+{{-- ===================================================== --}}
+{{-- Dashboard --}}
+{{-- ===================================================== --}}
+
 <a href="{{ route('dashboard') }}"
 class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
 
@@ -96,6 +100,19 @@ class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
     Dashboard
 
 </a>
+
+<a href="{{ route('profil') }}"
+class="{{ request()->routeIs('profil') ? 'active' : '' }}">
+
+    <i class="fa-solid fa-id-card"></i>
+
+    Profil Akun
+
+</a>
+
+{{-- ===================================================== --}}
+{{-- ADMIN --}}
+{{-- ===================================================== --}}
 
 @if(auth()->user()->isAdmin())
 
@@ -117,6 +134,15 @@ class="{{ request()->routeIs('guru.*') ? 'active' : '' }}">
 
 </a>
 
+<a href="{{ route('pengurus-kelas.index') }}"
+class="{{ request()->routeIs('pengurus-kelas.*') ? 'active' : '' }}">
+
+    <i class="fa-solid fa-users"></i>
+
+    Pengurus Kelas
+
+</a>
+
 <a href="{{ route('siswa.import') }}"
 class="{{ request()->routeIs('siswa.import*') ? 'active' : '' }}">
 
@@ -126,16 +152,67 @@ class="{{ request()->routeIs('siswa.import*') ? 'active' : '' }}">
 
 </a>
 
+<a href="{{ route('login-log.index') }}"
+class="{{ request()->routeIs('login-log.*') ? 'active' : '' }}">
+
+    <i class="fa-solid fa-clock-rotate-left"></i>
+
+    Riwayat Login
+
+</a>
+
+<a href="{{ route('activity-log.index') }}"
+class="{{ request()->routeIs('activity-log.*') ? 'active' : '' }}">
+
+    <i class="fa-solid fa-list-check"></i>
+
+    Activity Log
+
+</a>
+
+<a href="{{ route('pengaturan.index') }}"
+class="{{ request()->routeIs('pengaturan.*') ? 'active' : '' }}">
+
+    <i class="fa-solid fa-gears"></i>
+
+    Pengaturan
+
+</a>
+
 @endif
 
+{{-- ===================================================== --}}
+{{-- PETUGAS PRESENSI --}}
+{{-- Guru + Ketua + Wakil + Sekretaris --}}
+{{-- ===================================================== --}}
+
+@if(auth()->user()->isPetugasPresensi())
+
+<a href="{{ route('presensi.create') }}"
+class="{{ request()->routeIs('presensi.create') ? 'active' : '' }}">
+
+    <i class="fa-solid fa-barcode"></i>
+
+    Scan Presensi
+
+</a>
+
 <a href="{{ route('presensi.index') }}"
-class="{{ request()->routeIs('presensi.*') ? 'active' : '' }}">
+class="{{ request()->routeIs('presensi.index') ? 'active' : '' }}">
 
     <i class="fa-solid fa-calendar-check"></i>
 
-    Presensi
+    Data Presensi
 
 </a>
+
+@endif
+
+{{-- ===================================================== --}}
+{{-- ADMIN + GURU --}}
+{{-- ===================================================== --}}
+
+@if(auth()->user()->isGuruAtauAdmin())
 
 <a href="{{ route('rekap.index') }}"
 class="{{ request()->routeIs('rekap.*') ? 'active' : '' }}">
@@ -146,13 +223,17 @@ class="{{ request()->routeIs('rekap.*') ? 'active' : '' }}">
 
 </a>
 
+@endif
+
 <hr class="text-white">
 
 <form action="{{ route('logout') }}" method="POST">
 
     @csrf
 
-    <button class="btn btn-link text-white text-decoration-none p-0">
+    <button
+        type="submit"
+        class="btn btn-link text-white text-decoration-none p-0">
 
         <i class="fa-solid fa-right-from-bracket"></i>
 
@@ -178,7 +259,13 @@ class="{{ request()->routeIs('rekap.*') ? 'active' : '' }}">
 
 <i class="fa-solid fa-user"></i>
 
-{{ auth()->user()->nama ?? 'Administrator' }}
+{{ auth()->user()->nama }}
+
+<small class="text-muted ms-2">
+
+({{ ucfirst(str_replace('_',' ',auth()->user()->role)) }})
+
+</small>
 
 </div>
 
@@ -201,6 +288,24 @@ class="{{ request()->routeIs('rekap.*') ? 'active' : '' }}">
 <div class="alert alert-danger">
 
 {{ session('error') }}
+
+</div>
+
+@endif
+
+@if($errors->any())
+
+<div class="alert alert-danger">
+
+<ul class="mb-0">
+
+@foreach($errors->all() as $error)
+
+<li>{{ $error }}</li>
+
+@endforeach
+
+</ul>
 
 </div>
 

@@ -9,7 +9,6 @@ class User extends Authenticatable
 {
     use Notifiable;
 
-
     protected $fillable = [
 
         'nama',
@@ -22,8 +21,9 @@ class User extends Authenticatable
 
         'aktif',
 
-    ];
+        'siswa_id',
 
+    ];
 
     protected $hidden = [
 
@@ -33,43 +33,102 @@ class User extends Authenticatable
 
     ];
 
-
     protected $casts = [
 
         'aktif' => 'boolean',
 
     ];
 
-
     /**
-     * Relasi ke data guru
+     * Relasi Guru
      */
     public function guru()
     {
-        return $this->hasOne(Guru::class);
+        return $this->hasOne(Guru::class, 'user_id');
     }
 
+    /**
+     * Relasi Siswa
+     */
+    public function siswa()
+    {
+        return $this->belongsTo(Siswa::class, 'siswa_id');
+    }
 
     /**
-     * Cek apakah user Administrator
+     * Administrator
      */
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
     }
 
-
     /**
-     * Cek apakah user Guru
+     * Guru
      */
     public function isGuru(): bool
     {
         return $this->role === 'guru';
     }
 
+    /**
+     * Ketua Kelas
+     */
+    public function isKetuaKelas(): bool
+    {
+        return $this->role === 'ketua_kelas';
+    }
 
     /**
-     * Cek apakah akun aktif
+     * Wakil Kelas
+     */
+    public function isWakilKelas(): bool
+    {
+        return $this->role === 'wakil_kelas';
+    }
+
+    /**
+     * Sekretaris
+     */
+    public function isSekretaris(): bool
+    {
+        return $this->role === 'sekretaris';
+    }
+
+    /**
+     * Semua Petugas Presensi
+     */
+    public function isPetugasPresensi(): bool
+    {
+        return in_array($this->role, [
+
+            'guru',
+
+            'ketua_kelas',
+
+            'wakil_kelas',
+
+            'sekretaris',
+
+        ]);
+    }
+
+    /**
+     * Guru atau Admin
+     */
+    public function isGuruAtauAdmin(): bool
+    {
+        return in_array($this->role, [
+
+            'admin',
+
+            'guru',
+
+        ]);
+    }
+
+    /**
+     * Akun Aktif
      */
     public function isAktif(): bool
     {

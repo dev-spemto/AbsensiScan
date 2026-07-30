@@ -88,6 +88,27 @@
 
                 </div>
 
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Jabatan</label>
+
+                    <select name="jabatan" class="form-select">
+
+                        <option value="" {{ empty($siswa->jabatan) ? 'selected' : '' }}>
+                            Tidak Ada Jabatan
+                        </option>
+
+                        <option value="Ketua Kelas" {{ $siswa->jabatan == 'Ketua Kelas' ? 'selected' : '' }}>
+                            Ketua Kelas
+                        </option>
+
+                        <option value="Sekretaris" {{ $siswa->jabatan == 'Sekretaris' ? 'selected' : '' }}>
+                            Sekretaris
+                        </option>
+
+                    </select>
+
+                </div>
+
                 <div class="col-md-12 mb-3">
                     <label class="form-label">Alamat</label>
 
