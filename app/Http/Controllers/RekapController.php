@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Guru;
+use App\Models\Izin;
 use App\Models\Kelas;
 use App\Models\Pengaturan;
 use App\Models\Presensi;
@@ -101,6 +102,8 @@ class RekapController extends Controller
             ->where('status', 'Alpha')
             ->count();
 
+        $izinDisetujui = Izin::where('status', 'Disetujui')->get();    
+
         /*
         |--------------------------------------------------------------------------
         | Data
@@ -122,6 +125,8 @@ class RekapController extends Controller
         return view('rekap.index', [
 
             'presensis' => $presensis,
+
+            'izinDisetujui' => $izinDisetujui,
 
             'kelas' => Kelas::orderBy('tingkat')
                 ->orderBy('nama_kelas')

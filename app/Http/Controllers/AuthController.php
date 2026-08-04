@@ -16,9 +16,7 @@ class AuthController extends Controller
     public function index()
     {
         if (Auth::check()) {
-
             return redirect()->route('dashboard');
-
         }
 
         return view('auth.login');
@@ -30,19 +28,13 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-
             'username' => 'required',
-
             'password' => 'required',
-
         ]);
 
         $credentials = [
-
             'username' => $request->username,
-
             'password' => $request->password,
-
         ];
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
@@ -56,51 +48,37 @@ class AuthController extends Controller
                 Auth::logout();
 
                 return back()->with('error', 'Akun tidak aktif.');
-
             }
 
             /*
-            |------------------------------------------------------------------
+            |--------------------------------------------------------------------------
             | Simpan Login Berhasil
-            |------------------------------------------------------------------
+            |--------------------------------------------------------------------------
             */
 
             LoginLog::create([
-
                 'user_id'    => $user->id,
-
                 'nama'       => $user->nama,
-
                 'username'   => $user->username,
-
                 'role'       => $user->role,
-
                 'ip_address' => $request->ip(),
-
                 'user_agent' => $request->userAgent(),
-
                 'status'     => 'berhasil',
-
                 'login_at'   => now(),
-
             ]);
 
             /*
-            |------------------------------------------------------------------
+            |--------------------------------------------------------------------------
             | Redirect Berdasarkan Role
-            |------------------------------------------------------------------
+            |--------------------------------------------------------------------------
             */
 
             if ($user->isAdmin()) {
-
                 return redirect()->route('dashboard');
-
             }
 
             if ($user->isGuru()) {
-
                 return redirect()->route('presensi.create');
-
             }
 
             if (
@@ -108,15 +86,12 @@ class AuthController extends Controller
                 $user->isWakilKelas() ||
                 $user->isSekretaris()
             ) {
-
                 return redirect()->route('presensi.create');
-
             }
 
             Auth::logout();
 
             return back()->with('error', 'Role akun tidak dikenali.');
-
         }
 
         /*
@@ -126,23 +101,14 @@ class AuthController extends Controller
         */
 
         LoginLog::create([
-
             'user_id'    => null,
-
             'nama'       => '-',
-
             'username'   => $request->username,
-
             'role'       => '-',
-
             'ip_address' => $request->ip(),
-
             'user_agent' => $request->userAgent(),
-
             'status'     => 'gagal',
-
             'login_at'   => now(),
-
         ]);
 
         return back()
@@ -162,7 +128,6 @@ class AuthController extends Controller
                 'Autentikasi',
                 'Logout dari sistem'
             );
-
         }
 
         Auth::logout();
@@ -184,23 +149,30 @@ class AuthController extends Controller
 
     /**
      * Form Ubah Password
+     * Hanya Administrator yang diperbolehkan.
      */
     public function editPassword()
     {
+        if (!auth()->user()->isAdmin()) {
+            abort(404);
+        }
+
         return view('auth.password');
     }
 
     /**
      * Simpan Password Baru
+     * Hanya Administrator yang diperbolehkan.
      */
     public function updatePassword(Request $request)
     {
+        if (!auth()->user()->isAdmin()) {
+            abort(404);
+        }
+
         $request->validate([
-
             'password_lama' => 'required',
-
-            'password' => 'required|min:6|confirmed',
-
+            'password'      => 'required|min:6|confirmed',
         ]);
 
         $user = auth()->user();
@@ -210,13 +182,10 @@ class AuthController extends Controller
             return back()->withErrors([
                 'password_lama' => 'Password lama tidak sesuai.'
             ]);
-
         }
 
         $user->update([
-
             'password' => Hash::make($request->password),
-
         ]);
 
         ActivityHelper::log(

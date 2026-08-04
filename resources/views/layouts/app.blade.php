@@ -223,6 +223,15 @@ class="{{ request()->routeIs('rekap.*') ? 'active' : '' }}">
 
 </a>
 
+<a href="{{ route('izin.index') }}"
+class="{{ request()->routeIs('izin.*') ? 'active' : '' }}">
+
+    <i class="fa-solid fa-notes-medical"></i>
+
+    Data Izin / Sakit
+
+</a>
+
 @endif
 
 <hr class="text-white">

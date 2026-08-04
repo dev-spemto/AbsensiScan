@@ -6,6 +6,7 @@ use App\Models\Guru;
 use App\Models\Pengaturan;
 use App\Models\Presensi;
 use App\Models\Siswa;
+use App\Models\Kelas;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -26,8 +27,6 @@ class DashboardController extends Controller
         $totalGuru = Guru::count();
 
         $totalKelas = \App\Models\Kelas::count();
-
-        $belumPresensiHariIni = $totalSiswa - $totalScanHariIni;
 
         $presensiHariIni = Presensi::whereDate('tanggal', today());
 
@@ -53,6 +52,16 @@ class DashboardController extends Controller
 
         $totalScanHariIni = (clone $presensiHariIni)->count();
 
+        $belumPresensiHariIni = $totalSiswa - $totalScanHariIni;
+
+        if ($belumPresensiHariIni < 0) {
+            $belumPresensiHariIni = 0;
+        }
+
+        $persentaseHadir = $totalSiswa > 0
+            ? round(($totalScanHariIni / $totalSiswa) * 100, 1)
+            : 0;
+
         /*
         |--------------------------------------------------------------------------
         | Presensi Terbaru
@@ -63,11 +72,16 @@ class DashboardController extends Controller
                 'siswa.kelas',
                 'scanner',
             ])
-            ->latest()
+            ->whereDate('tanggal', today())
+            ->latest('jam_scan')
             ->take(10)
             ->get();
 
         $presensiTerbaru = $presensiTerakhir->first();
+
+        $presensiTerakhir = $presensiTerakhir->sortByDesc(function ($item) {
+            return $item->tanggal.' '.$item->jam_scan;
+        })->values();
 
         /*
         |--------------------------------------------------------------------------
@@ -75,6 +89,16 @@ class DashboardController extends Controller
         |--------------------------------------------------------------------------
         */
 
+        $kelasTeraktif = Kelas::withCount([
+            'siswas as hadir_hari_ini' => function ($q) {
+                $q->whereHas('presensis', function ($p) {
+                    $p->whereDate('tanggal', today());
+                });
+            }
+        ])
+        ->orderByDesc('hadir_hari_ini')
+        ->first();
+        
         $grafikMingguan = Presensi::select(
                 DB::raw('DATE(tanggal) as tanggal'),
                 DB::raw('COUNT(*) as total')
@@ -92,7 +116,7 @@ class DashboardController extends Controller
 
             'totalGuru',
 
-            'totalKelas'
+            'totalKelas',
 
             'hadirHariIni',
 
@@ -106,13 +130,17 @@ class DashboardController extends Controller
 
             'totalScanHariIni',
 
-            'belumPresensiHariIni'
+            'persentaseHadir',
+
+            'belumPresensiHariIni',
 
             'presensiTerakhir',
 
             'presensiTerbaru',
 
-            'grafikMingguan'
+            'grafikMingguan',
+
+            'kelasTeraktif',
 
         ));
     }

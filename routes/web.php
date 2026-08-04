@@ -14,6 +14,7 @@ use App\Http\Controllers\PengaturanController;
 use App\Http\Controllers\PengurusKelasController;
 use App\Http\Controllers\LoginLogController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\IzinController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,13 +49,17 @@ Route::middleware('auth')->group(function () {
         ->name('dashboard');
 
     Route::get('/profil', [AuthController::class, 'profil'])
-    ->name('profil');
+        ->name('profil');
 
-    Route::get('/password', [AuthController::class, 'editPassword'])
-    ->name('password.edit');
+    Route::middleware('role:admin')->group(function () {
 
-Route::put('/password', [AuthController::class, 'updatePassword'])
-    ->name('password.update');
+        Route::get('/password', [AuthController::class, 'editPassword'])
+            ->name('password.edit');
+
+        Route::put('/password', [AuthController::class, 'updatePassword'])
+            ->name('password.update');
+
+    });
 
     /*
     |--------------------------------------------------------------------------
@@ -64,77 +69,46 @@ Route::put('/password', [AuthController::class, 'updatePassword'])
 
     Route::middleware('role:admin')->group(function () {
 
-    /*
-    |--------------------------------------------------------------------------
-    | Import Excel
-    |--------------------------------------------------------------------------
-    */
+        Route::get('/siswa/import', [ImportController::class, 'index'])
+            ->name('siswa.import');
 
-    Route::get('/siswa/import', [ImportController::class, 'index'])
-        ->name('siswa.import');
+        Route::post('/siswa/import', [ImportController::class, 'store'])
+            ->name('siswa.import.store');
 
-    Route::post('/siswa/import', [ImportController::class, 'store'])
-        ->name('siswa.import.store');
+        Route::get('/siswa/import/template', [ImportController::class, 'downloadTemplate'])
+            ->name('siswa.import.template');
 
-    Route::get('/siswa/import/template', [ImportController::class, 'downloadTemplate'])
-        ->name('siswa.import.template');
+        Route::resource('siswa', SiswaController::class);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Master Data
-    |--------------------------------------------------------------------------
-    */
+        Route::resource('guru', GuruController::class);
 
-    Route::resource('siswa', SiswaController::class);
+        Route::resource('pengurus-kelas', PengurusKelasController::class);
 
-    Route::resource('guru', GuruController::class);
+        Route::get(
+            '/pengurus-kelas/{pengurus_kela}/password',
+            [PengurusKelasController::class, 'editPassword']
+        )->name('pengurus-kelas.password');
 
-    /*
-    |--------------------------------------------------------------------------
-    | Pengurus Kelas
-    |--------------------------------------------------------------------------
-    */
+        Route::put(
+            '/pengurus-kelas/{pengurus_kela}/password',
+            [PengurusKelasController::class, 'updatePassword']
+        )->name('pengurus-kelas.password.update');
 
-    Route::resource('pengurus-kelas', PengurusKelasController::class);
+        Route::post(
+            '/pengurus-kelas/{pengurus_kela}/reset-password',
+            [PengurusKelasController::class, 'resetPassword']
+        )->name('pengurus-kelas.reset-password');
 
-    Route::get(
-        '/pengurus-kelas/{pengurus_kela}/password',
-        [PengurusKelasController::class, 'editPassword']
-    )->name('pengurus-kelas.password');
+        Route::get(
+            '/login-log',
+            [LoginLogController::class, 'index']
+        )->name('login-log.index');
 
-    Route::put(
-        '/pengurus-kelas/{pengurus_kela}/password',
-        [PengurusKelasController::class, 'updatePassword']
-    )->name('pengurus-kelas.password.update');
+        Route::get('/pengaturan', [PengaturanController::class, 'index'])
+            ->name('pengaturan.index');
 
-    Route::post(
-    '/pengurus-kelas/{pengurus_kela}/reset-password',
-    [PengurusKelasController::class, 'resetPassword']
-    )->name('pengurus-kelas.reset-password');
-
-    /*
-    |--------------------------------------------------------------------------
-    | Riwayat Login
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/login-log',
-        [LoginLogController::class, 'index']
-    )->name('login-log.index');
-
-    /*
-    |--------------------------------------------------------------------------
-    | Pengaturan
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get('/pengaturan', [PengaturanController::class, 'index'])
-        ->name('pengaturan.index');
-
-    Route::put('/pengaturan', [PengaturanController::class, 'update'])
-        ->name('pengaturan.update');
-
+        Route::put('/pengaturan', [PengaturanController::class, 'update'])
+            ->name('pengaturan.update');
     });
 
     /*
@@ -154,11 +128,13 @@ Route::put('/password', [AuthController::class, 'updatePassword'])
 
     /*
     |--------------------------------------------------------------------------
-    | Rekap Presensi
+    | Rekap Presensi & Izin
     |--------------------------------------------------------------------------
     */
 
     Route::middleware('role:admin,guru')->group(function () {
+
+        Route::resource('izin', IzinController::class);
 
         Route::get('/rekap', [RekapController::class, 'index'])
             ->name('rekap.index');

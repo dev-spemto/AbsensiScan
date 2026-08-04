@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ActivityHelper;
 use App\Models\Guru;
 use App\Models\Pengaturan;
 use App\Models\Presensi;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Helpers\ActivityHelper;
+use Illuminate\Support\Facades\DB;
 
 class PresensiController extends Controller
 {
@@ -17,24 +19,21 @@ class PresensiController extends Controller
      */
     public function index(Request $request)
     {
-    $query = Presensi::with([
-        'siswa.kelas',
-        'guru',
-        'scanner',
-        'tahunAjaran',
-    ]);
+        $query = Presensi::with([
+            'siswa.kelas',
+            'guru',
+            'scanner',
+            'tahunAjaran',
+        ]);
 
-    $gurus = Guru::where('aktif', true)
-        ->orderBy('nama')
-        ->get();
+        $gurus = Guru::where('aktif', true)
+            ->orderBy('nama')
+            ->get();
 
-    $scanner = \App\Models\User::orderBy('nama')
-        ->get();
+        $scanner = \App\Models\User::orderBy('nama')->get();
 
         if ($request->filled('tanggal')) {
-
             $query->whereDate('tanggal', $request->tanggal);
-
         }
 
         if ($request->filled('keyword')) {
@@ -51,33 +50,23 @@ class PresensiController extends Controller
         }
 
         if ($request->filled('status')) {
-
             $query->where('status', $request->status);
-
         }
 
         if ($request->filled('scanner')) {
-
             $query->where('scanner_id', $request->scanner);
-
         }
 
         if ($request->filled('scan_by')) {
-
             $query->where('scan_by', $request->scan_by);
-
         }
 
         if ($request->filled('guru')) {
-
             $query->where('guru_id', $request->guru);
-
         }
 
         if ($request->filled('metode')) {
-
             $query->where('metode', $request->metode);
-
         }
 
         $presensis = $query
@@ -86,13 +75,9 @@ class PresensiController extends Controller
             ->withQueryString();
 
         return view('presensi.index', compact(
-
             'presensis',
-
             'gurus',
-
             'scanner'
-
         ));
     }
 
@@ -106,8 +91,8 @@ class PresensiController extends Controller
         $pengaturan = Pengaturan::first();
 
         $riwayat = Presensi::with([
-               'siswa.kelas',
-               'scanner'
+                'siswa.kelas',
+                'scanner',
             ])
             ->whereDate('tanggal', today())
             ->latest('jam_scan')
@@ -127,15 +112,15 @@ class PresensiController extends Controller
     {
         $request->validate([
 
-            'siswa_id' => 'required|exists:siswas,id',
-            'guru_id' => 'nullable|exists:gurus,id',
+            'siswa_id'        => 'required|exists:siswas,id',
+            'guru_id'         => 'nullable|exists:gurus,id',
             'tahun_ajaran_id' => 'required|exists:tahun_ajarans,id',
-            'tanggal' => 'required|date',
-            'jam_scan' => 'required',
-            'status' => 'required',
-            'metode' => 'required',
-            'keterangan' => 'nullable',
-            'device_name' => 'nullable',
+            'tanggal'         => 'required|date',
+            'jam_scan'        => 'required',
+            'status'          => 'required',
+            'metode'          => 'required',
+            'keterangan'      => 'nullable',
+            'device_name'     => 'nullable',
 
         ]);
 
@@ -173,139 +158,231 @@ class PresensiController extends Controller
      */
     public function scan(Request $request)
     {
-    $request->validate([
-        'barcode' => 'required'
-    ]);
-
-    $barcode = trim($request->barcode);
-
-    $siswa = Siswa::with('kelas')
-        ->where(function ($q) use ($barcode) {
-            $q->where('barcode', $barcode)
-              ->orWhere('nisn', $barcode);
-        })
-        ->first();
-
-    if (!$siswa) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Siswa tidak ditemukan.'
+        $request->validate([
+            'barcode' => 'required'
         ]);
-    }
 
-    if (!$siswa->aktif) {
+        $barcode = trim($request->barcode);
+
+        $siswa = Siswa::with('kelas')
+            ->where(function ($q) use ($barcode) {
+                $q->where('barcode', $barcode)
+                ->orWhere('nisn', $barcode);
+            })
+            ->first();
+
+        if (!$siswa) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Siswa tidak ditemukan.'
+            ]);
+        }
+
+        if (!$siswa->aktif) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Siswa sudah tidak aktif.'
+            ]);
+        }
+
+        $tahunAjaran = TahunAjaran::where('aktif', true)->first();
+
+        if (!$tahunAjaran) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Belum ada Tahun Ajaran aktif.'
+            ]);
+        }
+
+        $pengaturan = Pengaturan::first();
+
+        if (!$pengaturan) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pengaturan sekolah belum dibuat.'
+            ]);
+        }
+
+        $jamSekarang = now($pengaturan->timezone);
+        $jam = $jamSekarang->format('H:i:s');
+
+        if (
+            $jam < $pengaturan->scan_mulai ||
+            $jam > $pengaturan->scan_selesai
+        ) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Presensi di luar jam yang diizinkan.'
+            ]);
+        }
+
+        $presensiHariIni = Presensi::where('siswa_id', $siswa->id)
+            ->whereDate('tanggal', $jamSekarang->toDateString())
+            ->first();
+
+        if ($presensiHariIni) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Jika status Alpha → update menjadi Hadir/Terlambat
+            |--------------------------------------------------------------------------
+            */
+
+            if ($presensiHariIni->status == 'Alpha') {
+
+                $presensiHariIni->update([
+
+                    'scanner_id'  => auth()->id(),
+                    'scan_by'     => auth()->user()->role,
+                    'guru_id'     => $guruId,
+                    'jam_scan'    => $jam,
+                    'status'      => $status,
+                    'metode'      => 'Barcode',
+                    'device_name' => $request->userAgent(),
+
+                ]);
+
+                ActivityHelper::log(
+                    'Update Alpha',
+                    'Presensi',
+                    'Alpha diubah menjadi '.$status.' : '.$siswa->nama
+                );
+
+                return response()->json([
+
+                    'success' => true,
+                    'message' => 'Alpha berhasil diperbarui menjadi '.$status,
+
+                    'id'      => $presensiHariIni->id,
+                    'nama'    => $siswa->nama,
+                    'kelas'   => optional($siswa->kelas)->nama_lengkap ?? '-',
+                    'status'  => $status,
+                    'jam'     => $presensiHariIni->jam_scan,
+                    'tanggal' => $presensiHariIni->tanggal,
+                    'foto'    => $this->getFotoSiswa($siswa),
+
+                    'scanner' => [
+                        'nama'  => auth()->user()->nama,
+                        'role'  => ucwords(str_replace('_',' ',auth()->user()->role)),
+                        'warna' => $this->getScannerColor(auth()->user()->role),
+                    ],
+
+                ]);
+
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Selain Alpha → Tolak Scan
+            |--------------------------------------------------------------------------
+            */
+
+            return response()->json([
+
+                'success' => false,
+                'message' => match ($presensiHariIni->status) {
+
+                    'Hadir'      => 'Siswa sudah hadir hari ini.',
+                    'Terlambat'  => 'Siswa sudah melakukan presensi (Terlambat).',
+                    'Izin'       => 'Siswa sedang berstatus Izin.',
+                    'Sakit'      => 'Siswa sedang berstatus Sakit.',
+                    default      => 'Siswa sudah memiliki presensi hari ini.',
+
+                }
+
+            ]);
+
+        }
+
+        $status = $jam <= $pengaturan->batas_terlambat
+            ? 'Hadir'
+            : 'Terlambat';
+
+        $user = auth()->user();
+
+        $guruId = null;
+
+        if ($user->isGuru() && $user->guru) {
+            $guruId = $user->guru->id;
+        }
+
+        if (
+        $user->isKetuaKelas() ||
+        $user->isWakilKelas() ||
+        $user->isSekretaris()
+        ) {
+            $guruId = null;
+        }
+
+    try {
+
+        $presensi = DB::transaction(function () use (
+            $siswa,
+            $guruId,
+            $user,
+            $tahunAjaran,
+            $jamSekarang,
+            $jam,
+            $status,
+            $request
+        ) {
+
+            return Presensi::create([
+
+                'siswa_id'        => $siswa->id,
+                'guru_id'         => $guruId,
+                'scanner_id'      => $user->id,
+                'scan_by'         => $user->role,
+                'tahun_ajaran_id' => $tahunAjaran->id,
+                'tanggal'         => $jamSekarang->toDateString(),
+                'jam_scan'        => $jam,
+                'status'          => $status,
+                'metode'          => 'Barcode',
+                'keterangan'      => null,
+                'device_name'     => $request->userAgent(),
+
+            ]);
+
+        });
+
+        ActivityHelper::log(
+            'Scan Barcode',
+            'Presensi',
+            'Scan presensi siswa: '.$siswa->nama
+        );
+
         return response()->json([
-            'success' => false,
-            'message' => 'Siswa sudah tidak aktif.'
+
+            'success' => true,
+            'message' => 'Presensi berhasil.',
+
+            'id'       => $presensi->id,
+            'nama'     => $siswa->nama,
+            'kelas'    => optional($siswa->kelas)->nama_lengkap ?? '-',
+            'status'   => $status,
+            'jam'      => $presensi->jam_scan,
+            'tanggal'  => $presensi->tanggal,
+            'foto'     => $this->getFotoSiswa($siswa),
+
+            'scanner' => [
+                'nama'  => $user->nama,
+                'role'  => ucwords(str_replace('_', ' ', $user->role)),
+                'warna' => $this->getScannerColor($user->role),
+            ],
+
         ]);
+
+        } catch (\Throwable $e) {
+
+            report($e);
+
+            return $this->responseError(
+                'Terjadi kesalahan saat menyimpan presensi.',
+                500
+            );
+
+        }
     }
-
-    $tahunAjaran = TahunAjaran::where('aktif', true)->first();
-
-    if (!$tahunAjaran) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Belum ada Tahun Ajaran aktif.'
-        ]);
-    }
-
-    $pengaturan = Pengaturan::first();
-
-    if (!$pengaturan) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Pengaturan sekolah belum dibuat.'
-        ]);
-    }
-
-    $jamSekarang = now($pengaturan->timezone);
-    $jam = $jamSekarang->format('H:i:s');
-
-    if (
-        $jam < $pengaturan->scan_mulai ||
-        $jam > $pengaturan->scan_selesai
-    ) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Presensi di luar jam yang diizinkan.'
-        ]);
-    }
-
-    $presensiHariIni = Presensi::where('siswa_id', $siswa->id)
-        ->whereDate('tanggal', $jamSekarang->toDateString())
-        ->exists();
-
-    if ($presensiHariIni) {
-        return response()->json([
-            'success' => false,
-            'message' => $siswa->nama.' sudah melakukan presensi hari ini.'
-        ]);
-    }
-
-    $status = $jam <= $pengaturan->batas_terlambat
-        ? 'Hadir'
-        : 'Terlambat';
-
-    $user = auth()->user();
-
-    $guruId = null;
-
-    if ($user->isGuru() && $user->guru) {
-        $guruId = $user->guru->id;
-    }
-
-    $presensi = Presensi::create([
-
-        'siswa_id'        => $siswa->id,
-        'guru_id'         => $guruId,
-        'scanner_id'      => $user->id,
-        'scan_by'         => $user->role,
-        'tahun_ajaran_id' => $tahunAjaran->id,
-        'tanggal'         => $jamSekarang->toDateString(),
-        'jam_scan'        => $jam,
-        'status'          => $status,
-        'metode'          => 'Barcode',
-        'keterangan'      => null,
-        'device_name'     => $request->userAgent(),
-
-    ]);
-
-    ActivityHelper::log(
-        'Scan Barcode',
-        'Presensi',
-        'Scan presensi siswa: '.$siswa->nama
-    );
-
-    return response()->json([
-
-        'success' => true,
-        'message' => 'Presensi berhasil.',
-
-        'id' => $presensi->id,
-        'nama' => $siswa->nama,
-        'kelas' => optional($siswa->kelas)->nama_lengkap ?? '-',
-        'status' => $status,
-        'jam' => $presensi->jam_scan,
-        'tanggal' => $presensi->tanggal,
-
-        'foto' => $siswa->foto
-            ? asset('storage/'.$siswa->foto)
-            : 'https://ui-avatars.com/api/?name='.urlencode($siswa->nama).'&size=200',
-
-        'scanner' => [
-            'nama' => $user->nama,
-            'role' => ucwords(str_replace('_',' ',$user->role)),
-            'warna' => match ($user->role) {
-                'admin' => 'danger',
-                'guru' => 'success',
-                'ketua_kelas' => 'primary',
-                'sekretaris' => 'purple',
-                default => 'secondary',
-            },
-        ],
-
-    ]);
-}
 
     /**
      * Detail
@@ -316,7 +393,7 @@ class PresensiController extends Controller
             'siswa.kelas',
             'guru',
             'scanner',
-            'tahunAjaran'
+            'tahunAjaran',
         ]);
 
         return view('presensi.show', compact('presensi'));
@@ -350,15 +427,15 @@ class PresensiController extends Controller
     {
         $request->validate([
 
-            'siswa_id' => 'required|exists:siswas,id',
-            'guru_id' => 'nullable|exists:gurus,id',
+            'siswa_id'        => 'required|exists:siswas,id',
+            'guru_id'         => 'nullable|exists:gurus,id',
             'tahun_ajaran_id' => 'required|exists:tahun_ajarans,id',
-            'tanggal' => 'required|date',
-            'jam_scan' => 'required',
-            'status' => 'required',
-            'metode' => 'required',
-            'keterangan' => 'nullable',
-            'device_name' => 'nullable',
+            'tanggal'         => 'required|date',
+            'jam_scan'        => 'required',
+            'status'          => 'required',
+            'metode'          => 'required',
+            'keterangan'      => 'nullable',
+            'device_name'     => 'nullable',
 
         ]);
 
@@ -407,5 +484,32 @@ class PresensiController extends Controller
         return redirect()
             ->route('presensi.index')
             ->with('success', 'Data presensi berhasil dihapus.');
+    }
+
+    private function responseError(string $message, int $status = 400)
+    {
+        return response()->json([
+            'success' => false,
+            'message' => $message,
+        ], $status);
+    }
+
+    private function getFotoSiswa(Siswa $siswa): string
+    {
+        return $siswa->foto
+            ? asset('storage/'.$siswa->foto)
+            : 'https://ui-avatars.com/api/?name='.urlencode($siswa->nama).'&size=200';
+    }
+
+    private function getScannerColor(string $role): string
+    {
+        return match ($role) {
+            'admin'         => 'danger',
+            'guru'          => 'success',
+            'ketua_kelas'   => 'primary',
+            'sekretaris'    => 'purple',
+            'wakil_kelas'   => 'warning',
+            default         => 'secondary',
+        };
     }
 }

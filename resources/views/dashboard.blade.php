@@ -259,27 +259,33 @@
 
             <div class="card-body">
 
-                <div class="d-flex justify-content-between">
+                <div class="d-flex justify-content-between align-items-center">
 
                     <div>
 
                         <small class="text-muted">
 
-                            Alpha
+                            Belum Presensi
 
                         </small>
 
-                        <h3 class="fw-bold text-dark mb-0">
+                        <h3 class="fw-bold text-danger mb-0">
 
-                            {{ $alphaHariIni }}
+                            {{ $belumPresensiHariIni }}
 
                         </h3>
 
                     </div>
 
-                    <i class="fa-solid fa-user-xmark fa-2x text-dark"></i>
+                    <i class="fa-solid fa-user-clock fa-2x text-danger"></i>
 
                 </div>
+
+                <small class="text-muted">
+
+                    Siswa yang belum melakukan scan hari ini.
+
+                </small>
 
             </div>
 
@@ -318,6 +324,36 @@
                             {{ $totalScanHariIni }}
 
                         </th>
+
+                    </tr>
+
+                    <tr>
+
+                        <td colspan="2">
+
+                            <small class="text-muted">
+
+                                Kehadiran Hari Ini
+                                <strong class="float-end">
+
+                                    {{ $persentaseHadir }}%
+
+                                </strong>
+
+                            </small>
+
+                            <div class="progress mt-2" style="height:10px;">
+
+                                <div
+                                    class="progress-bar bg-success"
+                                    role="progressbar"
+                                    style="width: {{ $persentaseHadir }}%;">
+
+                                </div>
+
+                            </div>
+
+                        </td>
 
                     </tr>
 
@@ -386,6 +422,46 @@
                 <hr>
 
                 @if($presensiTerbaru)
+
+                    <div class="alert alert-success mb-3">
+
+                        <div class="fw-bold">
+
+                            <i class="fa-solid fa-trophy"></i>
+
+                            Kelas Teraktif Hari Ini
+
+                        </div>
+
+                        @if($kelasTeraktif)
+
+                            <div class="mt-2">
+
+                                <h5 class="mb-0">
+
+                                    {{ $kelasTeraktif->nama_lengkap }}
+
+                                </h5>
+
+                                <small>
+
+                                    {{ $kelasTeraktif->hadir_hari_ini }} siswa sudah presensi
+
+                                </small>
+
+                            </div>
+
+                        @else
+
+                            <small>
+
+                                Belum ada data presensi hari ini.
+
+                            </small>
+
+                        @endif
+
+                    </div>
 
                     <div class="small">
 

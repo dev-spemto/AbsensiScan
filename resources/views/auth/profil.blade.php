@@ -88,7 +88,9 @@
 
         </table>
 
-        <a href="#"
+        @if(auth()->user()->isAdmin())
+
+        <a href="{{ route('password.edit') }}"
             class="btn btn-success">
 
             <i class="fa-solid fa-key"></i>
@@ -96,6 +98,8 @@
             Ubah Password
 
         </a>
+
+        @endif
 
     </div>
 
