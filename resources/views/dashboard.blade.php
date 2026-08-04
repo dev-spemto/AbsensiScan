@@ -8,263 +8,183 @@
 {{-- Statistik Utama --}}
 {{-- ====================================================== --}}
 
-<div class="row g-3 mb-4">
-
+<div class="row g-4 mb-4">
     <div class="col-xl-3 col-md-6">
-
-        <div class="card border-0 shadow-sm h-100">
-
-            <div class="card-body">
-
-                <div class="d-flex justify-content-between align-items-center">
-
-                    <div>
-
-                        <div class="text-muted small">
-
-                            Total Siswa
-
-                        </div>
-
-                        <h2 class="fw-bold text-success mb-0">
-
-                            {{ number_format($totalSiswa) }}
-
-                        </h2>
-
+        <div class="card border-0 shadow-lg rounded-4 h-100 overflow-hidden">
+            <div class="card-body d-flex justify-content-between align-items-center p-4">
+                <div>
+                    <div class="text-muted small mb-1">
+                        Total Siswa
                     </div>
-
-                    <div class="rounded-circle bg-success bg-opacity-10 p-3">
-
-                        <i class="fa-solid fa-user-graduate fa-2x text-success"></i>
-
-                    </div>
-
+                    <h2 class="fw-bold text-success mb-1">
+                        {{ number_format($totalSiswa) }}
+                    </h2>
+                    <small class="text-muted">
+                        Siswa aktif
+                    </small>
                 </div>
 
+                <div class="rounded-circle bg-success-subtle d-flex align-items-center justify-content-center"
+                    style="width:70px;height:70px;">
+                    <i class="fa-solid fa-user-graduate fa-2x text-success"></i>
+                </div>
             </div>
-
         </div>
-
     </div>
 
     <div class="col-xl-3 col-md-6">
-
-        <div class="card border-0 shadow-sm h-100">
-
-            <div class="card-body">
-
-                <div class="d-flex justify-content-between align-items-center">
-
-                    <div>
-
-                        <div class="text-muted small">
-
-                            Total Guru
-
-                        </div>
-
-                        <h2 class="fw-bold text-primary mb-0">
-
-                            {{ number_format($totalGuru) }}
-
-                        </h2>
-
+        <div class="card border-0 shadow-lg rounded-4 h-100 overflow-hidden">
+            <div class="card-body d-flex justify-content-between align-items-center p-4">
+                <div>
+                    <div class="text-muted small mb-1">
+                        Total Guru
                     </div>
-
-                    <div class="rounded-circle bg-primary bg-opacity-10 p-3">
-
-                        <i class="fa-solid fa-chalkboard-user fa-2x text-primary"></i>
-
-                    </div>
-
+                    <h2 class="fw-bold text-primary mb-1">
+                        {{ number_format($totalGuru) }}
+                    </h2>
+                    <small class="text-muted">
+                        Guru aktif
+                    </small>
                 </div>
 
+                <div class="rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center"
+                    style="width:70px;height:70px;">
+                    <i class="fa-solid fa-chalkboard-user fa-2x text-primary"></i>
+                </div>
             </div>
-
         </div>
-
     </div>
 
     <div class="col-xl-3 col-md-6">
-
-        <div class="card border-0 shadow-sm h-100">
-
-            <div class="card-body">
-
-                <div class="d-flex justify-content-between align-items-center">
-
-                    <div>
-
-                        <div class="text-muted small">
-
-                            Total Kelas
-
-                        </div>
-
-                        <h2 class="fw-bold text-warning mb-0">
-
-                            {{ number_format($totalKelas) }}
-
-                        </h2>
-
+        <div class="card border-0 shadow-lg rounded-4 h-100 overflow-hidden">
+            <div class="card-body d-flex justify-content-between align-items-center p-4">
+                <div>
+                    <div class="text-muted small mb-1">
+                        Total Kelas
                     </div>
-
-                    <div class="rounded-circle bg-warning bg-opacity-10 p-3">
-
-                        <i class="fa-solid fa-school fa-2x text-warning"></i>
-
-                    </div>
-
+                    <h2 class="fw-bold text-warning mb-1">
+                        {{ number_format($totalKelas) }}
+                    </h2>
+                    <small class="text-muted">
+                        Kelas aktif
+                    </small>
                 </div>
 
+                <div class="rounded-circle bg-warning-subtle d-flex align-items-center justify-content-center"
+                    style="width:70px;height:70px;">
+                    <i class="fa-solid fa-school fa-2x text-warning"></i>
+                </div>
             </div>
-
         </div>
-
     </div>
 
     <div class="col-xl-3 col-md-6">
-
-        <div class="card border-0 shadow-sm h-100">
-
-            <div class="card-body">
-
-                <div class="d-flex justify-content-between align-items-center">
-
-                    <div>
-
-                        <div class="text-muted small">
-
-                            Presensi Hari Ini
-
-                        </div>
-
-                        <h2 class="fw-bold text-info mb-0">
-
-                            {{ $totalScanHariIni }}
-
-                        </h2>
-
+        <div class="card border-0 shadow-lg rounded-4 h-100 overflow-hidden">
+            <div class="card-body d-flex justify-content-between align-items-center p-4">
+                <div>
+                    <div class="text-muted small mb-1">
+                        Presensi Hari Ini
                     </div>
-
-                    <div class="rounded-circle bg-info bg-opacity-10 p-3">
-
-                        <i class="fa-solid fa-calendar-check fa-2x text-info"></i>
-
-                    </div>
-
+                    <h2 class="fw-bold text-info mb-1">
+                        {{ $totalScanHariIni }}
+                    </h2>
+                    <small class="text-muted">
+                        Scan berhasil
+                    </small>
                 </div>
 
+                <div class="rounded-circle bg-info-subtle d-flex align-items-center justify-content-center"
+                    style="width:70px;height:70px;">
+                    <i class="fa-solid fa-calendar-check fa-2x text-info"></i>
+                </div>
             </div>
-
         </div>
-
     </div>
-
 </div>
 
 {{-- ====================================================== --}}
 {{-- Status Hari Ini --}}
 {{-- ====================================================== --}}
 
-<div class="row g-3 mb-4">
+<div class="row g-4 mb-5">
 
-    <div class="col-lg-2 col-md-4 col-6">
+    @php
 
-        <div class="card border-0 shadow-sm text-center h-100">
+        $statusCards = [
 
-            <div class="card-body">
+            [
+                'title' => 'Hadir',
+                'value' => $hadirHariIni,
+                'icon'  => 'fa-circle-check',
+                'color' => 'success',
+            ],
 
-                <i class="fa-solid fa-circle-check text-success fa-2x mb-2"></i>
+            [
+                'title' => 'Terlambat',
+                'value' => $terlambatHariIni,
+                'icon'  => 'fa-clock',
+                'color' => 'danger',
+            ],
 
-                <h3 class="fw-bold text-success">
+            [
+                'title' => 'Izin',
+                'value' => $izinHariIni,
+                'icon'  => 'fa-envelope-open-text',
+                'color' => 'warning',
+            ],
 
-                    {{ $hadirHariIni }}
+            [
+                'title' => 'Sakit',
+                'value' => $sakitHariIni,
+                'icon'  => 'fa-notes-medical',
+                'color' => 'info',
+            ],
 
-                </h3>
+            [
+                'title' => 'Alpha',
+                'value' => $alphaHariIni,
+                'icon'  => 'fa-user-xmark',
+                'color' => 'secondary',
+            ],
 
-                <div class="small text-muted">
+            [
+                'title' => 'Belum Scan',
+                'value' => $belumPresensiHariIni,
+                'icon'  => 'fa-user-clock',
+                'color' => 'dark',
+            ],
 
-                    Hadir
+        ];
 
-                </div>
+    @endphp
 
-            </div>
+    @foreach($statusCards as $item)
 
-        </div>
+        <div class="col-xl-2 col-lg-4 col-md-4 col-6">
 
-    </div>
+            <div class="card border-0 shadow-sm rounded-4 h-100">
 
-    <div class="col-lg-2 col-md-4 col-6">
+                <div class="card-body text-center py-4">
 
-        <div class="card border-0 shadow-sm text-center h-100">
+                    <div
+                        class="rounded-circle bg-{{ $item['color'] }} bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3"
+                        style="width:64px;height:64px;">
 
-            <div class="card-body">
+                        <i class="fa-solid {{ $item['icon'] }} fa-xl text-{{ $item['color'] }}"></i>
 
-                <i class="fa-solid fa-clock text-danger fa-2x mb-2"></i>
+                    </div>
 
-                <h3 class="fw-bold text-danger">
+                    <h2 class="fw-bold mb-1">
 
-                    {{ $terlambatHariIni }}
+                        {{ $item['value'] }}
 
-                </h3>
+                    </h2>
 
-                <div class="small text-muted">
+                    <div class="text-muted small">
 
-                    Terlambat
+                        {{ $item['title'] }}
 
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="col-lg-2 col-md-4 col-6">
-
-        <div class="card border-0 shadow-sm text-center h-100">
-
-            <div class="card-body">
-
-                <i class="fa-solid fa-envelope-open-text text-warning fa-2x mb-2"></i>
-
-                <h3 class="fw-bold text-warning">
-
-                    {{ $izinHariIni }}
-
-                </h3>
-
-                <div class="small text-muted">
-
-                    Izin
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="col-lg-2 col-md-4 col-6">
-
-        <div class="card border-0 shadow-sm text-center h-100">
-
-            <div class="card-body">
-
-                <i class="fa-solid fa-notes-medical text-info fa-2x mb-2"></i>
-
-                <h3 class="fw-bold text-info">
-
-                    {{ $sakitHariIni }}
-
-                </h3>
-
-                <div class="small text-muted">
-
-                    Sakit
+                    </div>
 
                 </div>
 
@@ -272,59 +192,7 @@
 
         </div>
 
-    </div>
-
-    <div class="col-lg-2 col-md-4 col-6">
-
-        <div class="card border-0 shadow-sm text-center h-100">
-
-            <div class="card-body">
-
-                <i class="fa-solid fa-user-xmark text-secondary fa-2x mb-2"></i>
-
-                <h3 class="fw-bold">
-
-                    {{ $alphaHariIni }}
-
-                </h3>
-
-                <div class="small text-muted">
-
-                    Alpha
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="col-lg-2 col-md-4 col-6">
-
-        <div class="card border-0 shadow-sm text-center h-100">
-
-            <div class="card-body">
-
-                <i class="fa-solid fa-user-clock text-dark fa-2x mb-2"></i>
-
-                <h3 class="fw-bold text-dark">
-
-                    {{ $belumPresensiHariIni }}
-
-                </h3>
-
-                <div class="small text-muted">
-
-                    Belum Scan
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
+    @endforeach
 
 </div>
 
@@ -332,165 +200,35 @@
 {{-- Ringkasan Dashboard --}}
 {{-- ====================================================== --}}
 
-<div class="row g-3 mb-4">
+<div class="row g-4 mb-5">
 
-    {{-- Ringkasan Hari Ini --}}
+    <div class="col-lg-8">
 
-    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
 
-        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
 
-            <div class="card-header bg-success text-white">
+                <div class="d-flex justify-content-between align-items-center mb-4">
 
-                <i class="fa-solid fa-chart-pie me-2"></i>
+                    <div>
 
-                Ringkasan Hari Ini
+                        <h5 class="fw-bold mb-1">
 
-            </div>
+                            Grafik Presensi 7 Hari
 
-            <div class="card-body">
+                        </h5>
 
-                <div class="mb-4">
+                        <small class="text-muted">
 
-                    <div class="d-flex justify-content-between mb-2">
+                            Statistik kehadiran siswa selama seminggu terakhir.
 
-                        <span>
-
-                            Persentase Kehadiran
-
-                        </span>
-
-                        <strong>
-
-                            {{ $persentaseHadir }}%
-
-                        </strong>
-
-                    </div>
-
-                    <div class="progress" style="height:12px">
-
-                        <div
-                            class="progress-bar bg-success"
-                            style="width:{{ $persentaseHadir }}%">
-
-                        </div>
+                        </small>
 
                     </div>
 
                 </div>
 
-                <table class="table table-sm align-middle mb-0">
-
-                    <tr>
-
-                        <td>Total Scan</td>
-
-                        <th class="text-end">
-
-                            {{ $totalScanHariIni }}
-
-                        </th>
-
-                    </tr>
-
-                    <tr>
-
-                        <td>Belum Scan</td>
-
-                        <th class="text-end text-danger">
-
-                            {{ $belumPresensiHariIni }}
-
-                        </th>
-
-                    </tr>
-
-                    <tr>
-
-                        <td>Hadir</td>
-
-                        <th class="text-end text-success">
-
-                            {{ $hadirHariIni }}
-
-                        </th>
-
-                    </tr>
-
-                    <tr>
-
-                        <td>Terlambat</td>
-
-                        <th class="text-end text-danger">
-
-                            {{ $terlambatHariIni }}
-
-                        </th>
-
-                    </tr>
-
-                    <tr>
-
-                        <td>Izin</td>
-
-                        <th class="text-end text-warning">
-
-                            {{ $izinHariIni }}
-
-                        </th>
-
-                    </tr>
-
-                    <tr>
-
-                        <td>Sakit</td>
-
-                        <th class="text-end text-info">
-
-                            {{ $sakitHariIni }}
-
-                        </th>
-
-                    </tr>
-
-                    <tr>
-
-                        <td>Alpha</td>
-
-                        <th class="text-end">
-
-                            {{ $alphaHariIni }}
-
-                        </th>
-
-                    </tr>
-
-                </table>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    {{-- Grafik --}}
-
-    <div class="col-lg-5">
-
-        <div class="card border-0 shadow-sm h-100">
-
-            <div class="card-header bg-primary text-white">
-
-                <i class="fa-solid fa-chart-line me-2"></i>
-
-                Grafik Presensi 7 Hari Terakhir
-
-            </div>
-
-            <div class="card-body">
-
-                <div style="height:320px">
+                <div style="height:360px">
 
                     <canvas id="grafikPresensi"></canvas>
 
@@ -502,81 +240,153 @@
 
     </div>
 
-    {{-- Sidebar Statistik --}}
+    <div class="col-lg-4">
 
-    <div class="col-lg-3">
-
-        <div class="card border-0 shadow-sm mb-3">
-
-            <div class="card-header bg-warning">
-
-                <strong>
-
-                    🏆 Kelas Teraktif
-
-                </strong>
-
-            </div>
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
 
             <div class="card-body">
 
-                @if($kelasTeraktif)
+                <h6 class="fw-bold mb-3">
 
-                    <h5 class="fw-bold">
+                    Ringkasan Hari Ini
 
-                        {{ $kelasTeraktif->nama_lengkap }}
+                </h6>
 
-                    </h5>
+                <div class="d-flex justify-content-between mb-2">
 
-                    <div class="text-muted">
+                    <span>Persentase Kehadiran</span>
 
-                        {{ $kelasTeraktif->hadir_hari_ini }}
+                    <strong>{{ $persentaseHadir }}%</strong>
 
-                        siswa hadir hari ini
+                </div>
 
-                    </div>
+                <div class="progress mb-4" style="height:10px">
 
-                @else
-
-                    <div class="text-muted">
-
-                        Belum ada data.
+                    <div
+                        class="progress-bar bg-success"
+                        style="width:{{ $persentaseHadir }}%">
 
                     </div>
 
-                @endif
+                </div>
+
+                <table class="table table-borderless table-sm mb-0">
+
+                    <tr>
+
+                        <td>Total Scan</td>
+
+                        <td class="text-end fw-bold">
+
+                            {{ $totalScanHariIni }}
+
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>Belum Scan</td>
+
+                        <td class="text-end fw-bold text-danger">
+
+                            {{ $belumPresensiHariIni }}
+
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>Hadir</td>
+
+                        <td class="text-end fw-bold text-success">
+
+                            {{ $hadirHariIni }}
+
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>Terlambat</td>
+
+                        <td class="text-end fw-bold text-danger">
+
+                            {{ $terlambatHariIni }}
+
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>Izin</td>
+
+                        <td class="text-end fw-bold text-warning">
+
+                            {{ $izinHariIni }}
+
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>Sakit</td>
+
+                        <td class="text-end fw-bold text-info">
+
+                            {{ $sakitHariIni }}
+
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>Alpha</td>
+
+                        <td class="text-end fw-bold text-secondary">
+
+                            {{ $alphaHariIni }}
+
+                        </td>
+
+                    </tr>
+
+                </table>
 
             </div>
 
         </div>
 
-        <div class="card border-0 shadow-sm">
-
-            <div class="card-header bg-success text-white">
-
-                Aktivitas Terakhir
-
-            </div>
+        <div class="card border-0 shadow-sm rounded-4">
 
             <div class="card-body">
 
+                <h6 class="fw-bold mb-3">
+
+                    Aktivitas Terakhir
+
+                </h6>
+
                 @if($presensiTerbaru)
 
-                    <h6 class="fw-bold mb-1">
+                    <h5 class="fw-bold mb-1">
 
                         {{ $presensiTerbaru->siswa->nama }}
 
-                    </h6>
+                    </h5>
 
-                    <div class="small text-muted">
+                    <div class="text-muted mb-3">
 
                         {{ optional($presensiTerbaru->siswa->kelas)->nama_lengkap }}
 
                     </div>
 
-                    <hr>
-
-                    <div>
+                    <div class="mb-2">
 
                         <strong>Jam Scan</strong>
 
@@ -586,15 +396,11 @@
 
                     </div>
 
-                    <div class="mt-3">
+                    <span class="badge bg-success fs-6">
 
-                        <span class="badge bg-success fs-6">
+                        {{ $presensiTerbaru->status }}
 
-                            {{ $presensiTerbaru->status }}
-
-                        </span>
-
-                    </div>
+                    </span>
 
                 @else
 
@@ -603,6 +409,30 @@
                         Belum ada aktivitas.
 
                     </div>
+
+                @endif
+
+                @if($kelasTeraktif)
+
+                    <hr>
+
+                    <small class="text-muted">
+
+                        Kelas Teraktif
+
+                    </small>
+
+                    <div class="fw-bold">
+
+                        {{ $kelasTeraktif->nama_lengkap }}
+
+                    </div>
+
+                    <small>
+
+                        {{ $kelasTeraktif->hadir_hari_ini }} siswa hadir
+
+                    </small>
 
                 @endif
 
@@ -618,11 +448,11 @@
 {{-- Presensi Terakhir --}}
 {{-- ====================================================== --}}
 
-<div class="card border-0 shadow-sm">
+<div class="card border-0 shadow rounded-4">
 
-    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center rounded-top-4">
 
-        <div>
+        <div class="fw-semibold">
 
             <i class="fa-solid fa-clock-rotate-left me-2"></i>
 
@@ -630,7 +460,7 @@
 
         </div>
 
-        <span class="badge bg-light text-success">
+        <span class="badge bg-light text-success px-3 py-2">
 
             {{ $presensiTerakhir->count() }} Data
 
@@ -642,35 +472,63 @@
 
         <style>
 
+            #dashboard-presensi-table{
+
+                margin-bottom:0;
+
+            }
+
+            #dashboard-presensi-table thead th{
+
+                background:#f8fafc;
+                border:0;
+                color:#6c757d;
+                font-size:.82rem;
+                font-weight:700;
+                letter-spacing:.5px;
+                text-transform:uppercase;
+                padding:16px;
+
+            }
+
+            #dashboard-presensi-table tbody td{
+
+                padding:16px;
+                vertical-align:middle;
+                border-color:#edf2f7;
+
+            }
+
             #dashboard-presensi-table tbody tr{
 
-                transition:.18s;
+                transition:all .2s ease;
 
             }
 
             #dashboard-presensi-table tbody tr:hover{
 
+                background:#f8fffb;
                 transform:scale(1.003);
+
+            }
+
+            .avatar-dashboard{
+
+                width:46px;
+                height:46px;
+                object-fit:cover;
+                border-radius:50%;
+                border:2px solid #e9ecef;
 
             }
 
         </style>
 
-    <style>
-
-        .table td{
-
-            vertical-align:middle;
-
-        }
-
-    </style>
-
         <table
             id="dashboard-presensi-table"
-            class="table table-hover align-middle mb-0">
+            class="table table-hover align-middle">
 
-            <thead class="table-light">
+            <thead>
 
                 <tr>
 
@@ -716,17 +574,12 @@
 
                         $warna = match($item->status){
 
-                            'Hadir'      => 'success',
-
-                            'Terlambat'  => 'danger',
-
-                            'Izin'       => 'warning',
-
-                            'Sakit'      => 'info',
-
-                            'Alpha'      => 'secondary',
-
-                            default      => 'dark'
+                            'Hadir' => 'success',
+                            'Terlambat' => 'danger',
+                            'Izin' => 'warning',
+                            'Sakit' => 'info',
+                            'Alpha' => 'secondary',
+                            default => 'dark'
 
                         };
 
@@ -749,12 +602,8 @@
                             <div class="d-flex align-items-center">
 
                                 <img
-                                    src="{{ $item->siswa->foto
-                                        ? asset('storage/'.$item->siswa->foto)
-                                        : asset('images/avatar-default.png') }}"
-                                    width="42"
-                                    height="42"
-                                    class="rounded-circle me-3">
+                                    src="{{ $item->siswa->foto ? asset('storage/'.$item->siswa->foto) : asset('images/avatar-default.png') }}"
+                                    class="avatar-dashboard me-3">
 
                                 <div>
 
@@ -778,7 +627,7 @@
 
                         <td>
 
-                            <span class="badge bg-light text-dark border">
+                            <span class="badge bg-light text-dark border px-3 py-2">
 
                                 {{ optional($item->siswa->kelas)->nama_lengkap ?? '-' }}
 
@@ -862,171 +711,183 @@
 
 const labels = [
 
-@foreach($grafikMingguan as $item)
+    @foreach($grafikMingguan as $item)
 
-    '{{ $item['tanggal'] }}',
+        '{{ $item['tanggal'] }}',
 
-@endforeach
+    @endforeach
 
 ];
 
 const hadir = [
 
-@foreach($grafikMingguan as $item)
+    @foreach($grafikMingguan as $item)
 
-    {{ $item['hadir'] }},
+        {{ $item['hadir'] }},
 
-@endforeach
+    @endforeach
 
 ];
 
 const terlambat = [
 
-@foreach($grafikMingguan as $item)
+    @foreach($grafikMingguan as $item)
 
-    {{ $item['terlambat'] }},
+        {{ $item['terlambat'] }},
 
-@endforeach
+    @endforeach
 
 ];
 
 const izin = [
 
-@foreach($grafikMingguan as $item)
+    @foreach($grafikMingguan as $item)
 
-    {{ $item['izin'] }},
+        {{ $item['izin'] }},
 
-@endforeach
+    @endforeach
 
 ];
 
 const sakit = [
 
-@foreach($grafikMingguan as $item)
+    @foreach($grafikMingguan as $item)
 
-    {{ $item['sakit'] }},
+        {{ $item['sakit'] }},
 
-@endforeach
+    @endforeach
 
 ];
 
 const alpha = [
 
-@foreach($grafikMingguan as $item)
+    @foreach($grafikMingguan as $item)
 
-    {{ $item['alpha'] }},
+        {{ $item['alpha'] }},
 
-@endforeach
+    @endforeach
 
 ];
 
-const ctx = document
-    .getElementById('grafikPresensi')
-    .getContext('2d');
+const ctx = document.getElementById('grafikPresensi').getContext('2d');
 
-const gradient = ctx.createLinearGradient(0,0,0,350);
+const gradient = ctx.createLinearGradient(0, 0, 0, 360);
 
-gradient.addColorStop(0,'rgba(25,135,84,.35)');
-gradient.addColorStop(.5,'rgba(25,135,84,.15)');
-gradient.addColorStop(1,'rgba(25,135,84,0)');
+gradient.addColorStop(0, 'rgba(25,135,84,.28)');
+gradient.addColorStop(.45, 'rgba(25,135,84,.10)');
+gradient.addColorStop(1, 'rgba(25,135,84,0)');
 
-new Chart(ctx,{
+new Chart(ctx, {
 
-    type:'line',
+    type: 'line',
 
-    data:{
+    data: {
 
-        labels:labels,
+        labels,
 
-        datasets:[
+        datasets: [
 
             {
 
-                label:'Hadir',
+                label: 'Hadir',
 
-                data:hadir,
+                data: hadir,
 
-                borderColor:'#198754',
+                borderColor: '#198754',
 
-                backgroundColor:'rgba(25,135,84,.08)',
+                backgroundColor: gradient,
 
-                fill:false,
+                fill: true,
 
-                tension:.35,
+                tension: .38,
 
-                borderWidth:3
+                borderWidth: 3,
+
+                pointRadius: 4,
+
+                pointHoverRadius: 6,
+
+                pointBackgroundColor: '#198754'
 
             },
 
             {
 
-                label:'Terlambat',
+                label: 'Terlambat',
 
-                data:terlambat,
+                data: terlambat,
 
-                borderColor:'#dc3545',
+                borderColor: '#dc3545',
 
-                backgroundColor:'rgba(220,53,69,.08)',
+                backgroundColor: 'transparent',
 
-                fill:false,
+                fill: false,
 
-                tension:.35,
+                tension: .38,
 
-                borderWidth:2
+                borderWidth: 2,
 
-            },
-
-            {
-
-                label:'Izin',
-
-                data:izin,
-
-                borderColor:'#ffc107',
-
-                backgroundColor:'rgba(255,193,7,.08)',
-
-                fill:false,
-
-                tension:.35,
-
-                borderWidth:2
+                pointRadius: 3
 
             },
 
             {
 
-                label:'Sakit',
+                label: 'Izin',
 
-                data:sakit,
+                data: izin,
 
-                borderColor:'#0dcaf0',
+                borderColor: '#ffc107',
 
-                backgroundColor:'rgba(13,202,240,.08)',
+                backgroundColor: 'transparent',
 
-                fill:false,
+                fill: false,
 
-                tension:.35,
+                tension: .38,
 
-                borderWidth:2
+                borderWidth: 2,
+
+                pointRadius: 3
 
             },
 
             {
 
-                label:'Alpha',
+                label: 'Sakit',
 
-                data:alpha,
+                data: sakit,
 
-                borderColor:'#6c757d',
+                borderColor: '#0dcaf0',
 
-                backgroundColor:'rgba(108,117,125,.08)',
+                backgroundColor: 'transparent',
 
-                fill:false,
+                fill: false,
 
-                tension:.35,
+                tension: .38,
 
-                borderWidth:2
+                borderWidth: 2,
+
+                pointRadius: 3
+
+            },
+
+            {
+
+                label: 'Alpha',
+
+                data: alpha,
+
+                borderColor: '#6c757d',
+
+                backgroundColor: 'transparent',
+
+                fill: false,
+
+                tension: .38,
+
+                borderWidth: 2,
+
+                pointRadius: 3
 
             }
 
@@ -1034,39 +895,63 @@ new Chart(ctx,{
 
     },
 
-    options:{
+    options: {
 
-        responsive:true,
+        responsive: true,
 
-        maintainAspectRatio:false,
+        maintainAspectRatio: false,
 
-        interaction:{
+        interaction: {
 
-            mode:'index',
+            mode: 'index',
 
-            intersect:false
+            intersect: false
 
         },
 
-        plugins:{
+        plugins: {
 
-            legend:{
+            legend: {
 
-                position:'bottom'
+                position: 'bottom',
+
+                labels: {
+
+                    usePointStyle: true,
+
+                    padding: 20
+
+                }
 
             }
 
         },
 
-        scales:{
+        scales: {
 
-            y:{
+            x: {
 
-                beginAtZero:true,
+                grid: {
 
-                ticks:{
+                    display: false
 
-                    precision:0
+                }
+
+            },
+
+            y: {
+
+                beginAtZero: true,
+
+                ticks: {
+
+                    precision: 0
+
+                },
+
+                grid: {
+
+                    color: '#eef2f7'
 
                 }
 

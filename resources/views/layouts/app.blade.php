@@ -20,52 +20,99 @@
 <style>
 
 body{
-    background:#f5f6fa;
+    background:#eef2f7;
+    font-family:'Segoe UI',sans-serif;
 }
 
 .sidebar{
-    width:250px;
+    width:260px;
     min-height:100vh;
-    background:#198754;
+    background:linear-gradient(180deg,#198754,#157347);
+    position:sticky;
+    top:0;
 }
 
 .sidebar .logo{
-    font-size:24px;
-    font-weight:bold;
-    color:white;
+    color:#fff;
+    font-size:22px;
+    font-weight:700;
+    letter-spacing:.5px;
+    text-align:center;
+    padding:12px 0 25px;
 }
 
 .sidebar a{
-    color:white;
+    color:rgba(255,255,255,.9);
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:13px 18px;
+    margin:5px 0;
+    border-radius:12px;
     text-decoration:none;
-    display:block;
-    padding:12px 18px;
-    border-radius:8px;
-    margin-bottom:5px;
-    transition:.2s;
+    transition:.25s;
+    font-weight:500;
+}
+
+.sidebar a i{
+    width:22px;
+    text-align:center;
+    font-size:16px;
 }
 
 .sidebar a:hover{
-    background:rgba(255,255,255,.15);
+    background:rgba(255,255,255,.12);
+    transform:translateX(4px);
 }
 
 .sidebar a.active{
-    background:white;
+    background:#fff;
     color:#198754;
+    box-shadow:0 8px 18px rgba(0,0,0,.12);
 }
 
 .content{
     flex:1;
+    min-width:0;
 }
 
 .topbar{
-    background:white;
-    padding:15px;
-    box-shadow:0 2px 10px rgba(0,0,0,.08);
+    background:#fff;
+    padding:18px 30px;
+    box-shadow:0 2px 15px rgba(0,0,0,.05);
 }
 
 .page{
-    padding:25px;
+    padding:30px;
+}
+
+.user-box{
+    border-top:1px solid rgba(255,255,255,.2);
+    margin-top:25px;
+    padding-top:20px;
+    text-align:center;
+}
+
+.user-box img{
+    width:70px;
+    height:70px;
+    border-radius:50%;
+    object-fit:cover;
+    border:3px solid rgba(255,255,255,.4);
+}
+
+.user-box h6{
+    color:#fff;
+    margin-top:10px;
+    margin-bottom:2px;
+}
+
+.user-box small{
+    color:#d8f3dc;
+}
+
+.logout-btn{
+    margin-top:15px;
 }
 
 </style>
@@ -88,169 +135,158 @@ Presensi Siswa
 
 </div>
 
-{{-- ===================================================== --}}
-{{-- Dashboard --}}
-{{-- ===================================================== --}}
-
 <a href="{{ route('dashboard') }}"
 class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
 
-    <i class="fa-solid fa-house"></i>
+<i class="fa-solid fa-house"></i>
 
-    Dashboard
+Dashboard
 
 </a>
 
 <a href="{{ route('profil') }}"
 class="{{ request()->routeIs('profil') ? 'active' : '' }}">
 
-    <i class="fa-solid fa-id-card"></i>
+<i class="fa-solid fa-id-card"></i>
 
-    Profil Akun
+Profil Akun
 
 </a>
-
-{{-- ===================================================== --}}
-{{-- ADMIN --}}
-{{-- ===================================================== --}}
 
 @if(auth()->user()->isAdmin())
 
 <a href="{{ route('siswa.index') }}"
 class="{{ request()->routeIs('siswa.*') ? 'active' : '' }}">
 
-    <i class="fa-solid fa-user-graduate"></i>
+<i class="fa-solid fa-user-graduate"></i>
 
-    Data Siswa
+Data Siswa
 
 </a>
 
 <a href="{{ route('guru.index') }}"
 class="{{ request()->routeIs('guru.*') ? 'active' : '' }}">
 
-    <i class="fa-solid fa-chalkboard-user"></i>
+<i class="fa-solid fa-chalkboard-user"></i>
 
-    Data Guru
+Data Guru
 
 </a>
 
 <a href="{{ route('pengurus-kelas.index') }}"
 class="{{ request()->routeIs('pengurus-kelas.*') ? 'active' : '' }}">
 
-    <i class="fa-solid fa-users"></i>
+<i class="fa-solid fa-users"></i>
 
-    Pengurus Kelas
+Pengurus Kelas
 
 </a>
 
 <a href="{{ route('siswa.import') }}"
 class="{{ request()->routeIs('siswa.import*') ? 'active' : '' }}">
 
-    <i class="fa-solid fa-file-import"></i>
+<i class="fa-solid fa-file-import"></i>
 
-    Import Excel
+Import Excel
 
 </a>
 
 <a href="{{ route('login-log.index') }}"
 class="{{ request()->routeIs('login-log.*') ? 'active' : '' }}">
 
-    <i class="fa-solid fa-clock-rotate-left"></i>
+<i class="fa-solid fa-clock-rotate-left"></i>
 
-    Riwayat Login
+Riwayat Login
 
 </a>
 
 <a href="{{ route('activity-log.index') }}"
 class="{{ request()->routeIs('activity-log.*') ? 'active' : '' }}">
 
-    <i class="fa-solid fa-list-check"></i>
+<i class="fa-solid fa-list-check"></i>
 
-    Activity Log
+Activity Log
 
 </a>
 
 <a href="{{ route('pengaturan.index') }}"
 class="{{ request()->routeIs('pengaturan.*') ? 'active' : '' }}">
 
-    <i class="fa-solid fa-gears"></i>
+<i class="fa-solid fa-gears"></i>
 
-    Pengaturan
+Pengaturan
 
 </a>
 
 @endif
-
-{{-- ===================================================== --}}
-{{-- PETUGAS PRESENSI --}}
-{{-- Guru + Ketua + Wakil + Sekretaris --}}
-{{-- ===================================================== --}}
 
 @if(auth()->user()->isPetugasPresensi())
 
 <a href="{{ route('presensi.create') }}"
 class="{{ request()->routeIs('presensi.create') ? 'active' : '' }}">
 
-    <i class="fa-solid fa-barcode"></i>
+<i class="fa-solid fa-barcode"></i>
 
-    Scan Presensi
+Scan Presensi
 
 </a>
 
 <a href="{{ route('presensi.index') }}"
 class="{{ request()->routeIs('presensi.index') ? 'active' : '' }}">
 
-    <i class="fa-solid fa-calendar-check"></i>
+<i class="fa-solid fa-calendar-check"></i>
 
-    Data Presensi
+Data Presensi
 
 </a>
 
 @endif
-
-{{-- ===================================================== --}}
-{{-- ADMIN + GURU --}}
-{{-- ===================================================== --}}
 
 @if(auth()->user()->isGuruAtauAdmin())
 
 <a href="{{ route('rekap.index') }}"
 class="{{ request()->routeIs('rekap.*') ? 'active' : '' }}">
 
-    <i class="fa-solid fa-chart-column"></i>
+<i class="fa-solid fa-chart-column"></i>
 
-    Rekap Presensi
+Rekap Presensi
 
 </a>
 
 <a href="{{ route('izin.index') }}"
 class="{{ request()->routeIs('izin.*') ? 'active' : '' }}">
 
-    <i class="fa-solid fa-notes-medical"></i>
+<i class="fa-solid fa-notes-medical"></i>
 
-    Data Izin / Sakit
+Data Izin / Sakit
 
 </a>
 
 @endif
 
-<hr class="text-white">
+<div class="user-box">
 
-<form action="{{ route('logout') }}" method="POST">
+<img src="{{ asset('images/avatar-default.png') }}">
 
-    @csrf
+<h6>{{ auth()->user()->nama }}</h6>
 
-    <button
-        type="submit"
-        class="btn btn-link text-white text-decoration-none p-0">
+<small>{{ ucfirst(str_replace('_',' ',auth()->user()->role)) }}</small>
 
-        <i class="fa-solid fa-right-from-bracket"></i>
+<form action="{{ route('logout') }}" method="POST" class="logout-btn">
 
-        Logout
+@csrf
 
-    </button>
+<button class="btn btn-light w-100">
+
+<i class="fa-solid fa-right-from-bracket me-2"></i>
+
+Logout
+
+</button>
 
 </form>
+
+</div>
 
 </div>
 
@@ -258,23 +294,31 @@ class="{{ request()->routeIs('izin.*') ? 'active' : '' }}">
 
 <div class="topbar d-flex justify-content-between align-items-center">
 
-<h4 class="mb-0">
+<div>
+
+<h4 class="mb-0 fw-bold">
 
 @yield('title','Dashboard')
 
 </h4>
 
+<small class="text-muted">
+
+{{ now()->translatedFormat('l, d F Y') }}
+
+</small>
+
+</div>
+
 <div>
+
+<span class="badge bg-success fs-6 px-3 py-2">
 
 <i class="fa-solid fa-user"></i>
 
 {{ auth()->user()->nama }}
 
-<small class="text-muted ms-2">
-
-({{ ucfirst(str_replace('_',' ',auth()->user()->role)) }})
-
-</small>
+</span>
 
 </div>
 
