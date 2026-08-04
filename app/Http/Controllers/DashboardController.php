@@ -18,17 +18,31 @@ class DashboardController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Statistik
+        | Tanggal Hari Ini
         |--------------------------------------------------------------------------
         */
 
-        $totalSiswa = Siswa::count();
+        $today = Carbon::today();
 
-        $totalGuru = Guru::count();
+        /*
+        |--------------------------------------------------------------------------
+        | Statistik Master
+        |--------------------------------------------------------------------------
+        */
 
-        $totalKelas = \App\Models\Kelas::count();
+        $totalSiswa = Siswa::where('aktif', true)->count();
 
-        $presensiHariIni = Presensi::whereDate('tanggal', today());
+        $totalGuru = Guru::where('aktif', true)->count();
+
+        $totalKelas = Kelas::count();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Presensi Hari Ini
+        |--------------------------------------------------------------------------
+        */
+
+        $presensiHariIni = Presensi::whereDate('tanggal', $today);
 
         $hadirHariIni = (clone $presensiHariIni)
             ->where('status', 'Hadir')
@@ -50,13 +64,24 @@ class DashboardController extends Controller
             ->where('status', 'Alpha')
             ->count();
 
+        /*
+        |--------------------------------------------------------------------------
+        | Total Scan
+        |--------------------------------------------------------------------------
+        */
+
         $totalScanHariIni = (clone $presensiHariIni)->count();
 
-        $belumPresensiHariIni = $totalSiswa - $totalScanHariIni;
+        $belumPresensiHariIni = max(
+            0,
+            $totalSiswa - $totalScanHariIni
+        );
 
-        if ($belumPresensiHariIni < 0) {
-            $belumPresensiHariIni = 0;
-        }
+        /*
+        |--------------------------------------------------------------------------
+        | Persentase Kehadiran
+        |--------------------------------------------------------------------------
+        */
 
         $persentaseHadir = $totalSiswa > 0
             ? round(($totalScanHariIni / $totalSiswa) * 100, 1)
@@ -72,75 +97,138 @@ class DashboardController extends Controller
                 'siswa.kelas',
                 'scanner',
             ])
-            ->whereDate('tanggal', today())
+            ->whereDate('tanggal', $today)
             ->latest('jam_scan')
             ->take(10)
             ->get();
 
         $presensiTerbaru = $presensiTerakhir->first();
 
-        $presensiTerakhir = $presensiTerakhir->sortByDesc(function ($item) {
-            return $item->tanggal.' '.$item->jam_scan;
-        })->values();
+        $presensiTerakhir = $presensiTerakhir
+            ->sortByDesc(function ($item) {
+                return $item->tanggal . ' ' . $item->jam_scan;
+            })
+            ->values();
 
         /*
         |--------------------------------------------------------------------------
-        | Grafik 7 Hari (Tahap 35)
+        | Grafik Presensi 7 Hari
+        |--------------------------------------------------------------------------
+        */
+
+        $grafikMingguan = collect();
+
+        for ($i = 6; $i >= 0; $i--) {
+
+            $tanggal = Carbon::today()->subDays($i);
+
+            $grafikMingguan->push([
+
+                'tanggal' => $tanggal->format('d M'),
+
+                'hadir' => Presensi::whereDate('tanggal', $tanggal)
+                    ->where('status', 'Hadir')
+                    ->count(),
+
+                'terlambat' => Presensi::whereDate('tanggal', $tanggal)
+                    ->where('status', 'Terlambat')
+                    ->count(),
+
+                'izin' => Presensi::whereDate('tanggal', $tanggal)
+                    ->where('status', 'Izin')
+                    ->count(),
+
+                'sakit' => Presensi::whereDate('tanggal', $tanggal)
+                    ->where('status', 'Sakit')
+                    ->count(),
+
+                'alpha' => Presensi::whereDate('tanggal', $tanggal)
+                    ->where('status', 'Alpha')
+                    ->count(),
+
+            ]);
+
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Kelas Teraktif Hari Ini
         |--------------------------------------------------------------------------
         */
 
         $kelasTeraktif = Kelas::withCount([
-            'siswas as hadir_hari_ini' => function ($q) {
-                $q->whereHas('presensis', function ($p) {
-                    $p->whereDate('tanggal', today());
-                });
-            }
-        ])
-        ->orderByDesc('hadir_hari_ini')
-        ->first();
-        
-        $grafikMingguan = Presensi::select(
-                DB::raw('DATE(tanggal) as tanggal'),
-                DB::raw('COUNT(*) as total')
-            )
-            ->whereDate('tanggal', '>=', Carbon::now()->subDays(6))
-            ->groupBy('tanggal')
-            ->orderBy('tanggal')
-            ->get();
+                'siswas as hadir_hari_ini' => function ($query) use ($today) {
+
+                    $query->whereHas('presensis', function ($presensi) use ($today) {
+
+                        $presensi->whereDate('tanggal', $today);
+
+                    });
+
+                }
+            ])
+            ->orderByDesc('hadir_hari_ini')
+            ->first();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Statistik Bulan Berjalan
+        |--------------------------------------------------------------------------
+        */
+
+        $presensiBulanIni = Presensi::whereMonth('tanggal', now()->month)
+            ->whereYear('tanggal', now()->year);
+
+        $hadirBulanIni = (clone $presensiBulanIni)
+            ->where('status', 'Hadir')
+            ->count();
+
+        $terlambatBulanIni = (clone $presensiBulanIni)
+            ->where('status', 'Terlambat')
+            ->count();
+
+        $izinBulanIni = (clone $presensiBulanIni)
+            ->where('status', 'Izin')
+            ->count();
+
+        $sakitBulanIni = (clone $presensiBulanIni)
+            ->where('status', 'Sakit')
+            ->count();
+
+        $alphaBulanIni = (clone $presensiBulanIni)
+            ->where('status', 'Alpha')
+            ->count();
 
         return view('dashboard', compact(
 
             'pengaturan',
 
             'totalSiswa',
-
             'totalGuru',
-
             'totalKelas',
 
             'hadirHariIni',
-
             'terlambatHariIni',
-
             'izinHariIni',
-
             'sakitHariIni',
-
             'alphaHariIni',
 
             'totalScanHariIni',
-
+            'belumPresensiHariIni',
             'persentaseHadir',
 
-            'belumPresensiHariIni',
-
-            'presensiTerakhir',
-
             'presensiTerbaru',
+            'presensiTerakhir',
 
             'grafikMingguan',
 
             'kelasTeraktif',
+
+            'hadirBulanIni',
+            'terlambatBulanIni',
+            'izinBulanIni',
+            'sakitBulanIni',
+            'alphaBulanIni'
 
         ));
     }
