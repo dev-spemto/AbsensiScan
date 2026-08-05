@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ActivityHelper;
 use App\Models\LoginLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use App\Helpers\ActivityHelper;
+use Throwable;
 
 class AuthController extends Controller
 {
@@ -28,92 +30,104 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'username' => 'required',
-            'password' => 'required',
+            'username' => 'required|string',
+            'password' => 'required|string',
         ]);
 
-        $credentials = [
-            'username' => $request->username,
-            'password' => $request->password,
-        ];
+        try {
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $credentials = [
+                'username' => $request->username,
+                'password' => $request->password,
+            ];
 
-            $request->session()->regenerate();
+            if (Auth::attempt($credentials, $request->boolean('remember'))) {
 
-            $user = Auth::user();
+                $request->session()->regenerate();
 
-            if (!$user->aktif) {
+                $user = Auth::user();
+
+                if (!$user->aktif) {
+
+                    Auth::logout();
+
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+
+                    return back()->with(
+                        'error',
+                        'Akun tidak aktif.'
+                    );
+
+                }
+
+                LoginLog::create([
+
+                    'user_id'    => $user->id,
+                    'nama'       => $user->nama,
+                    'username'   => $user->username,
+                    'role'       => $user->role,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'status'     => 'berhasil',
+                    'login_at'   => now(),
+
+                ]);
+
+                if ($user->isAdmin()) {
+                    return redirect()->route('dashboard');
+                }
+
+                if (
+                    $user->isGuru() ||
+                    $user->isKetuaKelas() ||
+                    $user->isWakilKelas() ||
+                    $user->isSekretaris()
+                ) {
+                    return redirect()->route('presensi.create');
+                }
 
                 Auth::logout();
 
-                return back()->with('error', 'Akun tidak aktif.');
-            }
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
 
-            /*
-            |--------------------------------------------------------------------------
-            | Simpan Login Berhasil
-            |--------------------------------------------------------------------------
-            */
+                return back()->with(
+                    'error',
+                    'Role akun tidak dikenali.'
+                );
+            }
 
             LoginLog::create([
-                'user_id'    => $user->id,
-                'nama'       => $user->nama,
-                'username'   => $user->username,
-                'role'       => $user->role,
+
+                'user_id'    => null,
+                'nama'       => '-',
+                'username'   => $request->username,
+                'role'       => '-',
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
-                'status'     => 'berhasil',
+                'status'     => 'gagal',
                 'login_at'   => now(),
+
             ]);
 
-            /*
-            |--------------------------------------------------------------------------
-            | Redirect Berdasarkan Role
-            |--------------------------------------------------------------------------
-            */
+            return back()
+                ->withInput($request->except('password'))
+                ->with(
+                    'error',
+                    'Username atau Password salah.'
+                );
 
-            if ($user->isAdmin()) {
-                return redirect()->route('dashboard');
-            }
+        } catch (Throwable $e) {
 
-            if ($user->isGuru()) {
-                return redirect()->route('presensi.create');
-            }
+            report($e);
 
-            if (
-                $user->isKetuaKelas() ||
-                $user->isWakilKelas() ||
-                $user->isSekretaris()
-            ) {
-                return redirect()->route('presensi.create');
-            }
+            return back()->with(
+                'error',
+                'Terjadi kesalahan saat login.'
+            );
 
-            Auth::logout();
-
-            return back()->with('error', 'Role akun tidak dikenali.');
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Simpan Login Gagal
-        |--------------------------------------------------------------------------
-        */
-
-        LoginLog::create([
-            'user_id'    => null,
-            'nama'       => '-',
-            'username'   => $request->username,
-            'role'       => '-',
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'status'     => 'gagal',
-            'login_at'   => now(),
-        ]);
-
-        return back()
-            ->withInput()
-            ->with('error', 'Username atau Password salah.');
     }
 
     /**
@@ -128,6 +142,7 @@ class AuthController extends Controller
                 'Autentikasi',
                 'Logout dari sistem'
             );
+
         }
 
         Auth::logout();
@@ -149,26 +164,20 @@ class AuthController extends Controller
 
     /**
      * Form Ubah Password
-     * Hanya Administrator yang diperbolehkan.
      */
     public function editPassword()
     {
-        if (!auth()->user()->isAdmin()) {
-            abort(404);
-        }
+        abort_unless(auth()->user()->isAdmin(), 404);
 
         return view('auth.password');
     }
 
     /**
      * Simpan Password Baru
-     * Hanya Administrator yang diperbolehkan.
      */
     public function updatePassword(Request $request)
     {
-        if (!auth()->user()->isAdmin()) {
-            abort(404);
-        }
+        abort_unless(auth()->user()->isAdmin(), 404);
 
         $request->validate([
             'password_lama' => 'required',
@@ -180,8 +189,9 @@ class AuthController extends Controller
         if (!Hash::check($request->password_lama, $user->password)) {
 
             return back()->withErrors([
-                'password_lama' => 'Password lama tidak sesuai.'
+                'password_lama' => 'Password lama tidak sesuai.',
             ]);
+
         }
 
         $user->update([
@@ -196,6 +206,9 @@ class AuthController extends Controller
 
         return redirect()
             ->route('profil')
-            ->with('success', 'Password berhasil diubah.');
+            ->with(
+                'success',
+                'Password berhasil diubah.'
+            );
     }
 }
