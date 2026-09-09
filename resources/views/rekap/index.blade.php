@@ -32,7 +32,7 @@
 
     <div class="col-lg-2 col-md-4">
 
-        <div class="card border-0 shadow-sm">
+        <div class="card border-0 shadow-sm h-100 rounded-4">
 
             <div class="card-body text-center">
 
@@ -56,7 +56,7 @@
 
     <div class="col-lg-2 col-md-4">
 
-        <div class="card border-success shadow-sm">
+        <div class="card border-success shadow-sm h-100 rounded-4">
 
             <div class="card-body text-center">
 
@@ -76,7 +76,7 @@
 
     <div class="col-lg-2 col-md-4">
 
-        <div class="card border-warning shadow-sm">
+        <div class="card border-warning shadow-sm h-100 rounded-4">
 
             <div class="card-body text-center">
 
@@ -96,7 +96,7 @@
 
     <div class="col-lg-2 col-md-4">
 
-        <div class="card border-primary shadow-sm">
+        <div class="card border-primary shadow-sm h-100 rounded-4">
 
             <div class="card-body text-center">
 
@@ -116,7 +116,7 @@
 
     <div class="col-lg-2 col-md-4">
 
-        <div class="card border-info shadow-sm">
+        <div class="card border-info shadow-sm h-100 rounded-4">
 
             <div class="card-body text-center">
 
@@ -136,7 +136,7 @@
 
     <div class="col-lg-2 col-md-4">
 
-        <div class="card border-danger shadow-sm">
+        <div class="card border-danger shadow-sm h-100 rounded-4">
 
             <div class="card-body text-center">
 
@@ -158,9 +158,9 @@
 
 {{-- Filter --}}
 
-<div class="card border-0 shadow-sm mb-4">
+<div class="card border-0 shadow-sm rounded-4 mb-4">
 
-    <div class="card-header bg-success text-white">
+    <div class="card-header bg-success text-white rounded-top-4">
 
         <i class="fa-solid fa-filter"></i>
 
@@ -392,28 +392,28 @@
 
             <div class="d-flex flex-wrap gap-2">
 
-                <button class="btn btn-success">
-                    <i class="fa-solid fa-magnifying-glass"></i>
+                <button class="btn btn-outline-success">
+                    <i class="fa-solid fa-magnifying-glass me-1"></i>
                     Tampilkan
                 </button>
 
                 <a href="{{ route('rekap.index') }}" class="btn btn-secondary">
-                    <i class="fa-solid fa-rotate-left"></i>
+                    <i class="fa-solid fa-rotate-left me-1"></i>
                     Reset
                 </a>
 
-                <a href="{{ route('rekap.export.excel', request()->query()) }}" class="btn btn-success">
-                    <i class="fa-solid fa-file-excel"></i>
+                <a href="{{ route('rekap.export.excel', request()->query()) }}" class="btn btn-outline-success">
+                    <i class="fa-solid fa-file-excel me-1"></i>
                     Export Excel
                 </a>
 
                 <a href="{{ route('rekap.export.pdf', request()->query()) }}" class="btn btn-danger">
-                    <i class="fa-solid fa-file-pdf"></i>
+                    <i class="fa-solid fa-file-pdf me-1"></i>
                     Export PDF
                 </a>
 
-                <a href="{{ route('rekap.print', request()->query()) }}" target="_blank" class="btn btn-dark">
-                    <i class="fa-solid fa-print"></i>
+                <a href="{{ route('rekap.print', request()->query()) }}" target="_blank" class="btn btn-outline-dark">
+                    <i class="fa-solid fa-print me-1"></i>
                     Print
                 </a>
 
@@ -427,9 +427,9 @@
 
 {{-- Tabel --}}
 
-<div class="card border-0 shadow-sm">
+<div class="card border-0 shadow-sm rounded-4">
 
-    <div class="card-header bg-success text-white">
+    <div class="card-header bg-success text-white rounded-top-4">
 
         <i class="fa-solid fa-table"></i>
 
@@ -554,7 +554,7 @@
                             width="45"
                             height="45"
                             class="rounded-circle border me-2"
-                            style="object-fit:cover;">
+                            style="object-fit:cover;border:2px solid #e9ecef;"
 
                         <div>
 
@@ -584,7 +584,7 @@
 
                 <td>
 
-                    <span class="badge bg-{{ $warna[$presensi->status] ?? 'secondary' }}">
+                    <span class="badge rounded-pill bg-{{ $warna[$presensi->status] ?? 'secondary' }} px-3 py-2">
 
                         {{ $presensi->status }}
 
@@ -600,7 +600,7 @@
 
                 <td>
 
-                    <span class="badge bg-{{ $roleColor[$presensi->scan_by] ?? 'secondary' }}">
+                    <span class="badge rounded-pill bg-{{ $roleColor[$presensi->scan_by] ?? 'secondary' }} px-3 py-2">
 
                         {{ $roleText[$presensi->scan_by] ?? '-' }}
 
@@ -616,7 +616,7 @@
 
                 <td>
 
-                    <span class="badge bg-{{ $metodeColor[$presensi->metode] ?? 'dark' }}">
+                    <span class="badge rounded-pill bg-{{ $metodeColor[$presensi->metode] ?? 'dark' }} px-3 py-2">
 
                         {{ $presensi->metode }}
 
@@ -656,7 +656,7 @@
 
     @if($presensis->hasPages())
 
-    <div class="card-footer bg-white">
+    <div class="card-footer bg-white rounded-bottom-4">
 
         <div class="d-flex justify-content-between align-items-center flex-wrap">
 
@@ -694,9 +694,9 @@
 
 {{-- Informasi --}}
 
-<div class="card border-0 shadow-sm mt-4">
+<div class="card border-0 shadow-sm rounded-4 mt-4">
 
-    <div class="card-header bg-light">
+    <div class="card-header bg-light rounded-top-4">
 
         <i class="fa-solid fa-circle-info text-success"></i>
 
@@ -710,7 +710,7 @@
 
             <div class="col-lg-3 col-md-6">
 
-                <div class="border rounded-3 p-3 h-100">
+                <div class="border rounded-4 p-3 h-100 shadow-sm">
 
                     <div class="fw-bold text-success mb-2">
 
@@ -733,7 +733,7 @@
 
             <div class="col-lg-3 col-md-6">
 
-                <div class="border rounded-3 p-3 h-100">
+                <div class="border rounded-4 p-3 h-100 shadow-sm">
 
                     <div class="fw-bold text-primary mb-2">
 
@@ -756,7 +756,7 @@
 
             <div class="col-lg-3 col-md-6">
 
-                <div class="border rounded-3 p-3 h-100">
+                <div class="border rounded-4 p-3 h-100 shadow-sm">
 
                     <div class="fw-bold text-warning mb-2">
 
@@ -779,7 +779,7 @@
 
             <div class="col-lg-3 col-md-6">
 
-                <div class="border rounded-3 p-3 h-100">
+                <div class="border rounded-4 p-3 h-100 shadow-sm">
 
                     <div class="fw-bold text-danger mb-2">
 

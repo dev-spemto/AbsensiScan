@@ -62,7 +62,7 @@
 
                     <input type="text"
                            class="form-control"
-                           value="{{ $presensi->siswa->kelas->nama_lengkap }}"
+                           value="{{ optional($presensi->siswa->kelas)->nama_lengkap ?? '-' }}"
                            readonly>
 
                 </div>
@@ -73,7 +73,7 @@
 
                     <input type="text"
                            class="form-control"
-                           value="{{ $presensi->guru->nama }}"
+                           value="{{ optional($presensi->guru)->nama ?? '-' }}"
                            readonly>
 
                 </div>
@@ -84,7 +84,7 @@
 
                     <input type="text"
                            class="form-control"
-                           value="{{ $presensi->tanggal->format('d-m-Y') }}"
+                           value="{{ \Carbon\Carbon::parse($presensi->tanggal)->format('d-m-Y') }}"
                            readonly>
 
                 </div>
@@ -104,7 +104,10 @@
 
                     <label class="form-label">Status</label>
 
-                    <select name="status" class="form-select" required>
+                    <select
+                        name="status"
+                        class="form-select @error('status') is-invalid @enderror"
+                        required>
 
                         <option value="Hadir" {{ $presensi->status=='Hadir' ? 'selected' : '' }}>
                             Hadir
@@ -134,7 +137,19 @@
 
                     <label class="form-label">Metode</label>
 
-                    <select name="metode" class="form-select">
+                    <select
+                        name="metode"
+                        class="form-select @error('metode') is-invalid @enderror">
+
+                        @error('metode')
+
+                            <div class="invalid-feedback">
+
+                                {{ $message }}
+
+                            </div>
+
+                        @enderror
 
                         <option value="Barcode" {{ $presensi->metode=='Barcode' ? 'selected' : '' }}>
                             Barcode
@@ -168,9 +183,21 @@
 
                     <label class="form-label">Keterangan</label>
 
-                    <textarea name="keterangan"
-                              rows="4"
-                              class="form-control">{{ old('keterangan',$presensi->keterangan) }}</textarea>
+                    <textarea
+                        name="keterangan"
+                        rows="4"
+                        class="form-control @error('keterangan') is-invalid @enderror">{{ old('keterangan', $presensi->keterangan) }}
+                    </textarea>
+
+                    @error('keterangan')
+
+                        <div class="invalid-feedback">
+
+                            {{ $message }}
+
+                        </div>
+
+                    @enderror
 
                 </div>
 

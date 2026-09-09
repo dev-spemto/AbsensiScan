@@ -22,7 +22,8 @@
 
             <form
                 action="{{ route('izin.update', $izin) }}"
-                method="POST">
+                method="POST"
+                enctype="multipart/form-data">
 
                 @csrf
                 @method('PUT')
@@ -123,6 +124,42 @@
 
                     </div>
 
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Bukti Izin / Surat Dokter
+                        </label>
+
+                        @if($izin->bukti)
+
+                            <div class="mb-2">
+
+                                <a
+                                    href="{{ asset('storage/'.$izin->bukti) }}"
+                                    target="_blank"
+                                    class="btn btn-sm btn-outline-primary">
+
+                                    <i class="fa-solid fa-eye me-1"></i>
+                                    Lihat Bukti Saat Ini
+
+                                </a>
+
+                            </div>
+
+                        @endif
+
+                        <input
+                            type="file"
+                            name="bukti"
+                            class="form-control"
+                            accept=".jpg,.jpeg,.png,.pdf">
+
+                        <small class="text-muted">
+                            Kosongkan jika tidak ingin mengganti bukti.
+                        </small>
+
+                    </div>
+                    
                     <div class="mb-3">
 
                         <label class="form-label">

@@ -4,6 +4,37 @@
 
 @section('content')
 
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+
+        <h3 class="fw-bold mb-1">
+
+            Selamat {{ $greeting }}, {{ auth()->user()->nama }} 👋
+
+        </h3>
+
+        <div class="text-muted">
+
+            {{ now()->translatedFormat('l, d F Y') }}
+
+        </div>
+
+    </div>
+
+    <div class="text-end">
+
+        <div
+            id="liveClock"
+            class="fw-bold text-success"
+            style="font-size:2rem;">
+
+        </div>
+
+    </div>
+
+</div>
+
 {{-- ====================================================== --}}
 {{-- Statistik Utama --}}
 {{-- ====================================================== --}}
@@ -101,6 +132,58 @@
         </div>
     </div>
 </div>
+<div class="row g-3 mb-5">
+
+    <div class="col">
+
+        <a href="{{ route('presensi.create') }}" class="btn btn-success w-100 py-3 rounded-4 shadow-sm">
+
+            <i class="fa-solid fa-barcode mb-2 d-block fs-3"></i>
+
+            Scan Presensi
+
+        </a>
+
+    </div>
+
+    <div class="col">
+
+        <a href="{{ route('presensi.index') }}" class="btn btn-primary w-100 py-3 rounded-4 shadow-sm">
+
+            <i class="fa-solid fa-calendar-check mb-2 d-block fs-3"></i>
+
+            Data Presensi
+
+        </a>
+
+    </div>
+
+    <div class="col">
+
+        <a href="{{ route('rekap.index') }}" class="btn btn-warning w-100 py-3 rounded-4 shadow-sm">
+
+            <i class="fa-solid fa-chart-column mb-2 d-block fs-3"></i>
+
+            Rekap
+
+        </a>
+
+    </div>
+
+    <div class="col">
+
+        <a href="{{ route('izin.index') }}" class="btn btn-info w-100 py-3 rounded-4 shadow-sm">
+
+            <i class="fa-solid fa-notes-medical mb-2 d-block fs-3"></i>
+
+            Izin
+
+        </a>
+
+    </div>
+
+</div>
+
 
 {{-- ====================================================== --}}
 {{-- Status Hari Ini --}}
@@ -776,6 +859,19 @@ const gradient = ctx.createLinearGradient(0, 0, 0, 360);
 gradient.addColorStop(0, 'rgba(25,135,84,.28)');
 gradient.addColorStop(.45, 'rgba(25,135,84,.10)');
 gradient.addColorStop(1, 'rgba(25,135,84,0)');
+
+function updateClock(){
+
+    const now = new Date();
+
+    document.getElementById('liveClock').innerHTML =
+        now.toLocaleTimeString('id-ID');
+
+}
+
+updateClock();
+
+setInterval(updateClock,1000);
 
 new Chart(ctx, {
 

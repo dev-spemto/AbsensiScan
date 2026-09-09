@@ -442,6 +442,32 @@
             }
         }
 
+        /* ==================================================
+        BARCODE SISWA
+        ================================================== */
+
+        .student-barcode {
+            display: inline-block;
+            background: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+
+        .student-barcode-image {
+            display: block;
+            width: 100%;
+            max-width: 360px;
+            height: auto;
+            margin: auto;
+        }
+
+        .student-barcode-number {
+            margin-top: 5px;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
     </style>
 
     @stack('styles')

@@ -4,320 +4,67 @@
 
 @section('content')
 
-<style>
-    .student-page-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 20px;
-        margin-bottom: 24px;
-    }
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
 
-    .student-page-title {
-        display: flex;
-        align-items: center;
-        gap: 13px;
-    }
+    <div>
+        <h3 class="fw-bold mb-1">
+            <i class="fa-solid fa-user-graduate text-success me-2"></i>
+            Data Siswa
+        </h3>
 
-    .student-page-icon {
-        width: 46px;
-        height: 46px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 13px;
-        background: #e8f5ee;
-        color: #198754;
-        font-size: 19px;
-    }
-
-    .student-page-title h3 {
-        margin: 0;
-        font-size: 22px;
-        font-weight: 700;
-    }
-
-    .student-page-title small {
-        color: #6b7280;
-    }
-
-    .student-actions {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-    }
-
-    .student-actions .btn {
-        border-radius: 9px;
-        font-weight: 600;
-    }
-
-    .student-table-card {
-        border: 0;
-        border-radius: 16px;
-        overflow: hidden;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, .05);
-    }
-
-    .student-table-card .card-body {
-        padding: 0;
-    }
-
-    .student-table-wrapper {
-        overflow-x: auto;
-    }
-
-    .student-table {
-        width: 100%;
-        min-width: 950px;
-        margin: 0;
-        vertical-align: middle;
-    }
-
-    .student-table thead th {
-        padding: 14px 15px;
-        background: #f0f8f4;
-        color: #374151;
-        border-bottom: 1px solid #dfe9e3;
-        font-size: 12px;
-        font-weight: 700;
-        white-space: nowrap;
-        text-transform: uppercase;
-        letter-spacing: .25px;
-    }
-
-    .student-table tbody td {
-        padding: 13px 15px;
-        border-color: #edf0f2;
-        font-size: 13px;
-    }
-
-    .student-table tbody tr {
-        transition: background .18s ease;
-    }
-
-    .student-table tbody tr:hover {
-        background: #f8fbf9;
-    }
-
-    .student-number {
-        width: 55px;
-        color: #6b7280;
-        font-weight: 600;
-    }
-
-    .student-photo {
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid #e5e7eb;
-        background: #f3f4f6;
-    }
-
-    .student-name {
-        color: #111827;
-        font-weight: 700;
-    }
-
-    .student-code {
-        color: #6b7280;
-        font-size: 12px;
-    }
-
-    .student-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 5px 9px;
-        border-radius: 7px;
-        font-size: 11px;
-        font-weight: 700;
-    }
-
-    .badge-active {
-        background: #e8f7ee;
-        color: #157347;
-    }
-
-    .badge-inactive {
-        background: #fdecec;
-        color: #b42318;
-    }
-
-    .badge-ketua {
-        background: #e8f7ee;
-        color: #157347;
-    }
-
-    .badge-sekretaris {
-        background: #eaf2ff;
-        color: #175cd3;
-    }
-
-    .student-actions-cell {
-        white-space: nowrap;
-        text-align: center;
-    }
-
-    .student-action {
-        width: 34px;
-        height: 34px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border: 0;
-        border-radius: 8px;
-        margin: 0 2px;
-        transition: transform .18s ease, opacity .18s ease;
-    }
-
-    .student-action:hover {
-        transform: translateY(-2px);
-    }
-
-    .student-action-view {
-        background: #e8f4ff;
-        color: #0d6efd;
-    }
-
-    .student-action-edit {
-        background: #fff4d6;
-        color: #a15c00;
-    }
-
-    .student-action-delete {
-        background: #fdeaea;
-        color: #dc3545;
-    }
-
-    .student-empty {
-        padding: 60px 20px !important;
-        text-align: center;
-        color: #9ca3af;
-    }
-
-    .student-empty-icon {
-        width: 60px;
-        height: 60px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 14px;
-        border-radius: 16px;
-        background: #f3f4f6;
-        color: #9ca3af;
-        font-size: 24px;
-    }
-
-    .student-pagination {
-        padding: 18px 20px;
-        border-top: 1px solid #edf0f2;
-    }
-
-    .student-pagination .pagination {
-        margin: 0;
-    }
-
-    .student-pagination .page-link {
-        border: 0;
-        margin: 0 2px;
-        border-radius: 8px;
-        color: #198754;
-    }
-
-    .student-pagination .page-item.active .page-link {
-        background: #198754;
-        color: #fff;
-    }
-
-    .student-alert {
-        border: 0;
-        border-radius: 12px;
-    }
-
-    @media (max-width: 767.98px) {
-
-        .student-page-header {
-            align-items: flex-start;
-            flex-direction: column;
-        }
-
-        .student-actions {
-            width: 100%;
-        }
-
-        .student-actions .btn {
-            flex: 1;
-        }
-
-        .student-page-title h3 {
-            font-size: 19px;
-        }
-
-    }
-</style>
-
-@if(session('success'))
-
-    <div class="alert alert-success student-alert alert-dismissible fade show" role="alert">
-
-        <i class="fa-solid fa-circle-check me-2"></i>
-
-        {{ session('success') }}
-
-        <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="alert"
-        ></button>
-
+        <small class="text-muted">
+            Kelola data siswa, kelas, status, dan identitas siswa.
+        </small>
     </div>
 
-@endif
+    <div class="d-flex gap-2">
 
-<div class="student-page-header">
-
-    <div class="student-page-title">
-
-        <div class="student-page-icon">
-
-            <i class="fa-solid fa-user-graduate"></i>
-
-        </div>
-
-        <div>
-
-            <h3>Data Siswa</h3>
-
-            <small>
-                Daftar seluruh siswa
-            </small>
-
-        </div>
-
-    </div>
-
-    <div class="student-actions">
-
-        <a
-            href="{{ route('siswa.import') }}"
-            class="btn btn-primary"
-        >
+        <a href="{{ route('siswa.import') }}"
+           class="btn btn-primary">
 
             <i class="fa-solid fa-file-import me-1"></i>
-
             Import Excel
 
         </a>
 
-        <a
-            href="{{ route('siswa.create') }}"
-            class="btn btn-success"
-        >
+        <a href="{{ route('siswa.barcode.massal') }}"
+            target="_blank"
+            class="btn btn-dark">
+
+            <i class="fa-solid fa-barcode"></i>
+
+            Cetak Barcode
+
+        </a>
+
+        <a href="{{ route('siswa.kartu.massal') }}"
+            target="_blank"
+            class="btn btn-success">
+
+            <i class="fa-solid fa-id-card"></i>
+
+            Cetak Kartu Pelajar
+
+        </a>
+
+        <form action="{{ route('siswa.generate-barcode') }}"
+            method="POST"
+            class="d-inline"
+            onsubmit="return confirm('Generate/update barcode semua siswa berdasarkan NISN?')">
+
+            @csrf
+
+            <button type="submit" class="btn btn-dark">
+                <i class="fa-solid fa-barcode"></i>
+                Generate Barcode
+            </button>
+
+        </form>
+
+        <a href="{{ route('siswa.create') }}"
+           class="btn btn-success">
 
             <i class="fa-solid fa-plus me-1"></i>
-
             Tambah Siswa
 
         </a>
@@ -326,51 +73,74 @@
 
 </div>
 
-<div class="card student-table-card">
 
-    <div class="card-body">
+@if(session('success'))
 
-        <div class="student-table-wrapper">
+<div class="alert alert-success alert-dismissible fade show border-0 shadow-sm"
+     role="alert">
 
-            <table class="table student-table">
+    <i class="fa-solid fa-circle-check me-2"></i>
 
-                <thead>
+    {{ session('success') }}
+
+    <button type="button"
+            class="btn-close"
+            data-bs-dismiss="alert">
+    </button>
+
+</div>
+
+@endif
+
+
+@if(session('error'))
+
+<div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm"
+     role="alert">
+
+    <i class="fa-solid fa-circle-exclamation me-2"></i>
+
+    {{ session('error') }}
+
+    <button type="button"
+            class="btn-close"
+            data-bs-dismiss="alert">
+    </button>
+
+</div>
+
+@endif
+
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-body p-0">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-success">
 
                     <tr>
 
-                        <th class="student-number">
-                            No
-                        </th>
+                        <th class="ps-4" width="60">No</th>
 
-                        <th>
-                            Foto
-                        </th>
+                        <th width="70">Foto</th>
 
-                        <th>
-                            NIS
-                        </th>
+                        <th>NIS</th>
 
-                        <th>
-                            NISN
-                        </th>
+                        <th>NISN</th>
 
-                        <th>
-                            Nama
-                        </th>
+                        <th>Nama</th>
 
-                        <th>
-                            Kelas
-                        </th>
+                        <th>Kelas</th>
 
-                        <th>
-                            Jabatan
-                        </th>
+                        <th>Jabatan</th>
 
-                        <th>
-                            Status
-                        </th>
+                        <th>Status</th>
 
-                        <th width="150" class="text-center">
+                        <th width="150" class="text-center pe-4">
                             Aksi
                         </th>
 
@@ -378,17 +148,21 @@
 
                 </thead>
 
+
                 <tbody>
 
                 @forelse($siswas as $index => $siswa)
 
                     <tr>
 
-                        <td class="student-number">
+                        <td class="ps-4 text-muted">
 
                             {{ $siswas->firstItem() + $index }}
 
                         </td>
+
+
+                        {{-- FOTO --}}
 
                         <td>
 
@@ -396,69 +170,119 @@
 
                                 <img
                                     src="{{ asset('storage/'.$siswa->foto) }}"
-                                    alt="{{ $siswa->nama }}"
-                                    class="student-photo"
-                                >
+                                    width="45"
+                                    height="45"
+                                    class="rounded-circle border"
+                                    style="object-fit:cover;"
+                                    alt="{{ $siswa->nama }}">
 
                             @else
 
                                 <img
                                     src="https://ui-avatars.com/api/?name={{ urlencode($siswa->nama) }}&background=198754&color=fff&size=100"
-                                    alt="{{ $siswa->nama }}"
-                                    class="student-photo"
-                                >
+                                    width="45"
+                                    height="45"
+                                    class="rounded-circle"
+                                    alt="{{ $siswa->nama }}">
 
                             @endif
 
                         </td>
 
+
+                        {{-- NIS --}}
+
                         <td>
 
-                            <span class="student-code">
+                            <span class="fw-semibold">
+
                                 {{ $siswa->nis ?: '-' }}
+
                             </span>
 
                         </td>
 
+
+                        {{-- NISN --}}
+
                         <td>
 
-                            <span class="student-code">
+                            <span class="text-muted">
+
                                 {{ $siswa->nisn ?: '-' }}
+
                             </span>
 
                         </td>
 
+
+                        {{-- NAMA --}}
+
                         <td>
 
-                            <div class="student-name">
+                            <div class="fw-semibold">
+
                                 {{ $siswa->nama }}
+
                             </div>
 
                         </td>
 
+
+                        {{-- KELAS --}}
+
                         <td>
 
-                            {{ optional($siswa->kelas)->nama_lengkap ?? '-' }}
+                            @if($siswa->kelas)
+
+                                <span class="badge bg-light text-dark border">
+
+                                    {{ $siswa->kelas->nama_lengkap }}
+
+                                </span>
+
+                            @else
+
+                                <span class="text-muted">
+
+                                    Belum ada kelas
+
+                                </span>
+
+                            @endif
 
                         </td>
+
+
+                        {{-- JABATAN --}}
 
                         <td>
 
                             @if($siswa->jabatan === 'Ketua Kelas')
 
-                                <span class="student-badge badge-ketua">
+                                <span class="badge bg-success">
 
-                                    <i class="fa-solid fa-crown"></i>
+                                    <i class="fa-solid fa-crown me-1"></i>
 
                                     Ketua Kelas
 
                                 </span>
 
+                            @elseif($siswa->jabatan === 'Wakil Ketua')
+
+                                <span class="badge bg-warning text-dark">
+
+                                    <i class="fa-solid fa-user-tie me-1"></i>
+
+                                    Wakil Ketua
+
+                                </span>
+
                             @elseif($siswa->jabatan === 'Sekretaris')
 
-                                <span class="student-badge badge-sekretaris">
+                                <span class="badge bg-primary">
 
-                                    <i class="fa-solid fa-pen"></i>
+                                    <i class="fa-solid fa-pen me-1"></i>
 
                                     Sekretaris
 
@@ -467,20 +291,25 @@
                             @else
 
                                 <span class="text-muted">
+
                                     -
+
                                 </span>
 
                             @endif
 
                         </td>
 
+
+                        {{-- STATUS --}}
+
                         <td>
 
                             @if($siswa->aktif)
 
-                                <span class="student-badge badge-active">
+                                <span class="badge bg-success">
 
-                                    <i class="fa-solid fa-circle-check"></i>
+                                    <i class="fa-solid fa-circle-check me-1"></i>
 
                                     Aktif
 
@@ -488,11 +317,11 @@
 
                             @else
 
-                                <span class="student-badge badge-inactive">
+                                <span class="badge bg-danger">
 
-                                    <i class="fa-solid fa-circle-xmark"></i>
+                                    <i class="fa-solid fa-circle-xmark me-1"></i>
 
-                                    Nonaktif
+                                    Non Aktif
 
                                 </span>
 
@@ -500,43 +329,51 @@
 
                         </td>
 
-                        <td class="student-actions-cell">
 
-                            <a
-                                href="{{ route('siswa.show', $siswa) }}"
-                                class="student-action student-action-view"
-                                title="Detail"
-                            >
+                        {{-- AKSI --}}
+
+                        <td class="text-center">
+
+                            {{-- BARCODE --}}
+                            <a href="{{ route('siswa.qr', $siswa) }}"
+                            target="_blank"
+                            class="btn btn-dark btn-sm"
+                            title="Lihat Barcode">
+
+                                <i class="fa-solid fa-barcode"></i>
+
+                            </a>
+
+                            {{-- DETAIL --}}
+                            <a href="{{ route('siswa.show', $siswa) }}"
+                            class="btn btn-info btn-sm"
+                            title="Detail">
 
                                 <i class="fa-solid fa-eye"></i>
 
                             </a>
 
-                            <a
-                                href="{{ route('siswa.edit', $siswa) }}"
-                                class="student-action student-action-edit"
-                                title="Edit"
-                            >
+                            {{-- EDIT --}}
+                            <a href="{{ route('siswa.edit', $siswa) }}"
+                            class="btn btn-warning btn-sm"
+                            title="Edit">
 
                                 <i class="fa-solid fa-pen"></i>
 
                             </a>
 
-                            <form
-                                action="{{ route('siswa.destroy', $siswa) }}"
+                            {{-- HAPUS --}}
+                            <form action="{{ route('siswa.destroy', $siswa) }}"
                                 method="POST"
-                                class="d-inline delete-student-form"
-                            >
+                                class="d-inline"
+                                onsubmit="return confirm('Yakin ingin menghapus data siswa ini?')">
 
                                 @csrf
-
                                 @method('DELETE')
 
-                                <button
-                                    type="submit"
-                                    class="student-action student-action-delete"
-                                    title="Hapus"
-                                >
+                                <button type="submit"
+                                        class="btn btn-danger btn-sm"
+                                        title="Hapus">
 
                                     <i class="fa-solid fa-trash"></i>
 
@@ -552,23 +389,21 @@
 
                     <tr>
 
-                        <td
-                            colspan="9"
-                            class="student-empty"
-                        >
+                        <td colspan="9"
+                            class="text-center text-muted py-5">
 
-                            <div class="student-empty-icon">
+                            <i class="fa-solid fa-users-slash fa-2x mb-3 d-block"></i>
 
-                                <i class="fa-solid fa-folder-open"></i>
+                            <div class="fw-semibold">
 
-                            </div>
+                                Belum ada data siswa.
 
-                            <div class="fw-semibold text-secondary">
-                                Belum ada data siswa
                             </div>
 
                             <small>
-                                Data siswa akan muncul di sini setelah ditambahkan.
+
+                                Silakan tambahkan siswa baru atau import melalui Excel.
+
                             </small>
 
                         </td>
@@ -583,9 +418,12 @@
 
         </div>
 
+
+        {{-- PAGINATION --}}
+
         @if($siswas->hasPages())
 
-            <div class="student-pagination">
+            <div class="p-3 border-top">
 
                 {{ $siswas->links() }}
 
@@ -598,42 +436,3 @@
 </div>
 
 @endsection
-
-@push('scripts')
-
-<script>
-
-document.addEventListener('DOMContentLoaded', function () {
-
-    document.querySelectorAll('.delete-student-form').forEach(function (form) {
-
-        form.addEventListener('submit', function (event) {
-
-            event.preventDefault();
-
-            Swal.fire({
-                title: 'Hapus data siswa?',
-                text: 'Data siswa yang dihapus tidak dapat dikembalikan.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Ya, hapus',
-                cancelButtonText: 'Batal',
-                reverseButtons: true,
-                focusCancel: true
-            }).then(function (result) {
-
-                if (result.isConfirmed) {
-                    form.submit();
-                }
-
-            });
-
-        });
-
-    });
-
-});
-
-</script>
-
-@endpush

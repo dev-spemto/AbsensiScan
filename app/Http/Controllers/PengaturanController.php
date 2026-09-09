@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ActivityHelper;
 use App\Models\Pengaturan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class PengaturanController extends Controller
 {
@@ -36,29 +39,38 @@ class PengaturanController extends Controller
             'timezone'          => 'required',
             'aktifkan_foto'     => 'boolean',
             'aktifkan_suara'    => 'boolean',
-            'logo'              => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
+            'logo'              => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        $pengaturan = Pengaturan::first();
+        DB::beginTransaction();
 
-        if (!$pengaturan) {
-            $pengaturan = new Pengaturan();
-        }
+        try {
 
-        $logo = $pengaturan->logo;
+            $pengaturan = Pengaturan::first();
 
-        if ($request->hasFile('logo')) {
-
-            if ($logo && Storage::disk('public')->exists($logo)) {
-                Storage::disk('public')->delete($logo);
+            if (!$pengaturan) {
+                $pengaturan = Pengaturan::create([]);
             }
 
-            $logo = $request->file('logo')->store('logo', 'public');
-        }
+            $logo = $pengaturan->logo;
 
-        $pengaturan->updateOrCreate(
-            ['id' => $pengaturan->id],
-            [
+            if ($request->hasFile('logo')) {
+
+                $logoBaru = $request->file('logo')
+                    ->store('logo', 'public');
+
+                if (
+                    $logo &&
+                    Storage::disk('public')->exists($logo)
+                ) {
+                    Storage::disk('public')->delete($logo);
+                }
+
+                $logo = $logoBaru;
+            }
+
+            $pengaturan->update([
+
                 'nama_sekolah'      => $request->nama_sekolah,
                 'alamat_sekolah'    => $request->alamat_sekolah,
                 'telepon'           => $request->telepon,
@@ -72,9 +84,34 @@ class PengaturanController extends Controller
                 'aktifkan_foto'     => $request->boolean('aktifkan_foto'),
                 'aktifkan_suara'    => $request->boolean('aktifkan_suara'),
                 'logo'              => $logo,
-            ]
-        );
 
-        return back()->with('success', 'Pengaturan berhasil disimpan.');
+            ]);
+
+            ActivityHelper::log(
+                'Edit Pengaturan',
+                'Pengaturan',
+                'Mengubah pengaturan aplikasi'
+            );
+
+            DB::commit();
+
+            return back()->with(
+                'success',
+                'Pengaturan berhasil disimpan.'
+            );
+
+        } catch (Throwable $e) {
+
+            DB::rollBack();
+
+            report($e);
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'Terjadi kesalahan saat menyimpan pengaturan.'
+                );
+        }
     }
 }

@@ -66,22 +66,22 @@
 
             <tr>
                 <th>Kelas</th>
-                <td>{{ $presensi->siswa->kelas->nama_lengkap }}</td>
+                <td>{{ optional($presensi->siswa->kelas)->nama_lengkap ?? '-' }}</td>
             </tr>
 
             <tr>
                 <th>Guru</th>
-                <td>{{ $presensi->guru->nama }}</td>
+                <td>{{ optional($presensi->guru)->nama ?? '-' }}</td>
             </tr>
 
             <tr>
                 <th>Tahun Ajaran</th>
-                <td>{{ $presensi->tahunAjaran->tahun }}</td>
+                <td>{{ optional($presensi->tahunAjaran)->tahun ?? '-' }}</td>
             </tr>
 
             <tr>
                 <th>Tanggal</th>
-                <td>{{ $presensi->tanggal->format('d F Y') }}</td>
+                <td>{{ \Carbon\Carbon::parse($presensi->tanggal)->translatedFormat('d F Y') }}</td>
             </tr>
 
             <tr>
@@ -106,7 +106,7 @@
 
                     @endphp
 
-                    <span class="badge bg-{{ $warna[$presensi->status] ?? 'secondary' }}">
+                    <span class="badge rounded-pill bg-{{ $warna[$presensi->status] ?? 'secondary' }} px-3 py-2">
 
                         {{ $presensi->status }}
 

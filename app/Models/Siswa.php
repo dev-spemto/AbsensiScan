@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\Models\PengurusKelas;
 
 class Siswa extends Model
@@ -34,17 +35,23 @@ class Siswa extends Model
         return $this->hasMany(Presensi::class);
     }
 
-    public function ketuaPengurus()
+    public function izins(): HasMany
+    {
+        return $this->hasMany(Izin::class);
+    }
+
+    public function ketuaPengurus(): HasOne
     {
         return $this->hasOne(PengurusKelas::class, 'ketua_siswa_id');
     }
+    
 
-    public function wakilPengurus()
+    public function wakilPengurus(): HasOne
     {
         return $this->hasOne(PengurusKelas::class, 'wakil_siswa_id');
     }
 
-    public function sekretarisPengurus()
+    public function sekretarisPengurus(): HasOne
     {
         return $this->hasOne(PengurusKelas::class, 'sekretaris_siswa_id');
     }

@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class User extends Authenticatable
 {
@@ -42,7 +44,7 @@ class User extends Authenticatable
     /**
      * Relasi Guru
      */
-    public function guru()
+    public function guru(): HasOne
     {
         return $this->hasOne(Guru::class, 'user_id');
     }
@@ -50,7 +52,7 @@ class User extends Authenticatable
     /**
      * Relasi Siswa
      */
-    public function siswa()
+    public function siswa(): BelongsTo
     {
         return $this->belongsTo(Siswa::class, 'siswa_id');
     }

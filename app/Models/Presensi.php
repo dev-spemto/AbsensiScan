@@ -8,6 +8,32 @@ use App\Models\User;
 
 class Presensi extends Model
 {
+    /*
+    |--------------------------------------------------------------------------
+    | Status Presensi
+    |--------------------------------------------------------------------------
+    */
+
+    public const STATUS_HADIR = 'Hadir';
+
+    public const STATUS_TERLAMBAT = 'Terlambat';
+
+    public const STATUS_IZIN = 'Izin';
+
+    public const STATUS_SAKIT = 'Sakit';
+
+    public const STATUS_ALPHA = 'Alpha';
+
+    /*
+    |--------------------------------------------------------------------------
+    | Metode Presensi
+    |--------------------------------------------------------------------------
+    */
+
+    public const METODE_BARCODE = 'Barcode';
+
+    public const METODE_MANUAL = 'Manual';
+    
     protected $table = 'presensis';
 
     protected $fillable = [

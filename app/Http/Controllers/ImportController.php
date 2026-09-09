@@ -27,11 +27,27 @@ class ImportController extends Controller
             'file' => 'required|mimes:xlsx,xls,csv|max:2048',
         ]);
 
-        Excel::import(new SiswasImport, $request->file('file'));
+        try {
 
-        return redirect()
-            ->route('siswa.index')
-            ->with('success', 'Data siswa berhasil diimport.');
+            Excel::import(
+                new SiswasImport,
+                $request->file('file')
+            );
+
+            return redirect()
+                ->route('siswa.index')
+                ->with('success', 'Data siswa berhasil diimport.');
+
+        } catch (\Throwable $e) {
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'Import gagal: '.$e->getMessage()
+                );
+
+        }
     }
 
     /**

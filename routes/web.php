@@ -78,6 +78,22 @@ Route::middleware('auth')->group(function () {
         Route::get('/siswa/import/template', [ImportController::class, 'downloadTemplate'])
             ->name('siswa.import.template');
 
+        Route::post(
+            '/siswa/generate-barcode',
+            [SiswaController::class, 'generateBarcode']
+        )->name('siswa.generate-barcode');
+        
+        Route::get(
+            '/siswa/{siswa}/qr',
+            [SiswaController::class, 'qr']
+        )->name('siswa.qr');
+
+        Route::get('/siswa/barcode/cetak', [SiswaController::class, 'barcodeMassal'])
+        ->name('siswa.barcode.massal');
+
+        Route::get('/siswa/kartu/cetak', [SiswaController::class, 'kartuMassal'])
+        ->name('siswa.kartu.massal');
+
         Route::resource('siswa', SiswaController::class);
 
         Route::resource('guru', GuruController::class);

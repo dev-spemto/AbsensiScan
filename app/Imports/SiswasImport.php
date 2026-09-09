@@ -2,22 +2,41 @@
 
 namespace App\Imports;
 
+use App\Helpers\QrCodeHelper;
 use App\Models\Kelas;
 use App\Models\Siswa;
 use Carbon\Carbon;
-use PhpOffice\PhpSpreadsheet\Shared\Date;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 class SiswasImport implements ToModel, WithHeadingRow
 {
     public function model(array $row)
     {
         // ============================
+        // Bersihkan data Excel
+        // ============================
+
+        $nis = trim((string) ($row['nis'] ?? ''));
+        $nisn = trim((string) ($row['nisn'] ?? ''));
+
+        if (!$nis || !$nisn) {
+            return null;
+        }
+
+        // ============================
         // Cari kelas
         // ============================
 
-        $kelasExcel = strtoupper(str_replace(' ', '', trim($row['kelas'])));
+        $kelasExcel = strtoupper(
+            str_replace(
+                ' ',
+                '',
+                trim((string) ($row['kelas'] ?? ''))
+            )
+        );
 
         $tingkat = substr($kelasExcel, 0, 1);
         $namaKelas = substr($kelasExcel, 1);
@@ -34,11 +53,11 @@ class SiswasImport implements ToModel, WithHeadingRow
         // Hindari data ganda
         // ============================
 
-        if (Siswa::where('nis', trim($row['nis']))->exists()) {
+        if (Siswa::where('nis', $nis)->exists()) {
             return null;
         }
 
-        if (Siswa::where('nisn', trim($row['nisn']))->exists()) {
+        if (Siswa::where('nisn', $nisn)->exists()) {
             return null;
         }
 
@@ -46,7 +65,7 @@ class SiswasImport implements ToModel, WithHeadingRow
         // Konversi tanggal Excel
         // ============================
 
-        $tanggal = $row['tanggal_lahir'];
+        $tanggal = $row['tanggal_lahir'] ?? null;
 
         if (is_numeric($tanggal)) {
 
@@ -61,22 +80,53 @@ class SiswasImport implements ToModel, WithHeadingRow
         }
 
         // ============================
-        // Simpan data
+        // Buat siswa
         // ============================
 
-        return new Siswa([
+        $siswa = new Siswa([
 
-            'nis'             => trim($row['nis']),
-            'nisn'            => trim($row['nisn']),
-            'barcode'         => trim($row['nisn']),
-            'nama'            => trim($row['nama']),
-            'tempat_lahir'    => trim($row['tempat_lahir']),
+            'nis'             => $nis,
+            'nisn'            => $nisn,
+            'barcode'         => $nisn,
+            'nama'            => trim((string) ($row['nama'] ?? '')),
+            'tempat_lahir'    => trim((string) ($row['tempat_lahir'] ?? '')),
             'tanggal_lahir'   => $tanggal,
-            'jenis_kelamin'   => strtoupper(trim($row['jenis_kelamin'])),
-            'alamat'          => trim($row['alamat']),
+            'jenis_kelamin'   => strtoupper(
+                trim((string) ($row['jenis_kelamin'] ?? ''))
+            ),
+            'alamat'          => trim((string) ($row['alamat'] ?? '')),
             'kelas_id'        => $kelas->id,
             'aktif'           => true,
 
         ]);
+
+        // ============================
+        // Simpan siswa
+        // ============================
+
+        $siswa->save();
+
+        // ============================
+        // Generate barcode berdasarkan NISN
+        // ============================
+
+        try {
+
+            QrCodeHelper::generate($siswa);
+
+        } catch (\Throwable $e) {
+
+            Log::error(
+                'Gagal generate barcode siswa',
+                [
+                    'siswa_id' => $siswa->id,
+                    'nisn'     => $siswa->nisn,
+                    'error'    => $e->getMessage(),
+                ]
+            );
+
+        }
+
+        return $siswa;
     }
 }

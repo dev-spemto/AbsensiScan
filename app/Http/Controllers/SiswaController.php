@@ -10,6 +10,8 @@ use Illuminate\Validation\Rule;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use App\Helpers\ActivityHelper;
+use App\Helpers\QrCodeHelper;
+use Milon\Barcode\Facades\DNS1DFacade;
 
 class SiswaController extends Controller
 {
@@ -160,6 +162,9 @@ class SiswaController extends Controller
         ]);
 
         $foto = $siswa->foto;
+        
+        $nisnLama = $siswa->nisn;
+        $nisnBaru = trim($request->nisn);
 
         if ($request->hasFile('foto')) {
 
@@ -184,6 +189,19 @@ class SiswaController extends Controller
             'foto'            => $foto,
             'aktif'           => $request->aktif,
         ]);
+
+        if ($nisnLama !== $nisnBaru) {
+
+            $barcodeLama = 'barcodes/siswa/' . $nisnLama . '.png';
+
+            if (Storage::disk('public')->exists($barcodeLama)) {
+                Storage::disk('public')->delete($barcodeLama);
+            }
+
+            $siswa->refresh();
+
+            QrCodeHelper::generate($siswa);
+        }
 
         $user = User::where('siswa_id', $siswa->id)->first();
 
@@ -217,9 +235,10 @@ class SiswaController extends Controller
 
         }
 
-        ActivityLogService::store(
-            "Mengubah data siswa: {$siswa->nama}",
-            "Data Siswa"
+        ActivityHelper::log(
+            'Edit Data',
+            'Siswa',
+            'Mengubah siswa: '.$siswa->nama
         );
         
         return redirect()
@@ -228,11 +247,101 @@ class SiswaController extends Controller
     }
 
     /**
+     * Generate Barcode Siswa
+     */
+    public function qr(Siswa $siswa)
+    {
+        if (!$siswa->nisn) {
+            abort(404, 'NISN siswa belum tersedia.');
+        }
+
+        $barcode = DNS1DFacade::getBarcodePNG(
+            $siswa->nisn,
+            'C128',
+            3,
+            80,
+            [0, 0, 0],
+            true
+        );
+
+        return response(base64_decode($barcode))
+            ->header('Content-Type', 'image/png');
+    }
+
+    /**
+     * Sinkronisasi Barcode Semua Siswa
+     */
+    public function generateBarcode()
+    {
+        $jumlah = 0;
+
+        Siswa::whereNotNull('nisn')
+            ->where('nisn', '!=', '')
+            ->chunkById(100, function ($siswas) use (&$jumlah) {
+
+                foreach ($siswas as $siswa) {
+
+                    $siswa->update([
+                        'barcode' => $siswa->nisn,
+                    ]);
+
+                    $jumlah++;
+                }
+
+            });
+
+        ActivityHelper::log(
+            'Generate Barcode',
+            'Siswa',
+            'Sinkronisasi barcode berdasarkan NISN untuk '.$jumlah.' siswa'
+        );
+
+        return redirect()
+            ->route('siswa.index')
+            ->with(
+                'success',
+                $jumlah.' barcode siswa berhasil dibuat/diperbarui berdasarkan NISN.'
+            );
+    }
+
+    /**
+     * Cetak Barcode Massal
+     */
+    public function barcodeMassal()
+    {
+        $siswas = Siswa::with('kelas')
+            ->where('aktif', true)
+            ->orderBy('nama')
+            ->get();
+
+        return view('siswa.barcode-massal', compact('siswas'));
+    }
+
+    /**
+     * Cetak Kartu Pelajar Massal
+     */
+    public function kartuMassal()
+    {
+        $siswas = Siswa::with('kelas')
+            ->where('aktif', true)
+            ->orderBy('nama')
+            ->get();
+
+        return view('siswa.kartu-massal', compact('siswas'));
+    }
+
+    /**
      * Hapus siswa.
      */
     public function destroy(Siswa $siswa)
     {
         $namaSiswa = $siswa->nama;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Cegah jika masih menjadi pengurus kelas
+        |--------------------------------------------------------------------------
+        */
         if (
             $siswa->ketuaPengurus ||
             $siswa->wakilPengurus ||
@@ -246,24 +355,90 @@ class SiswaController extends Controller
 
         }
 
-        if ($siswa->foto && Storage::disk('public')->exists($siswa->foto)) {
-            Storage::disk('public')->delete($siswa->foto);
+        /*
+        |--------------------------------------------------------------------------
+        | Cegah jika memiliki riwayat presensi
+        |--------------------------------------------------------------------------
+        */
+        if ($siswa->presensis()->exists()) {
+
+            return back()->with(
+                'error',
+                'Siswa tidak dapat dihapus karena memiliki riwayat presensi.'
+            );
+
         }
 
-        User::where('siswa_id', $siswa->id)->delete();
+        try {
 
-        $siswa->delete();
+            /*
+            |--------------------------------------------------------------------------
+            | Hapus foto
+            |--------------------------------------------------------------------------
+            */
+            if (
+                $siswa->foto &&
+                Storage::disk('public')->exists($siswa->foto)
+            ) {
 
-        ActivityHelper::log(
-            'Hapus Data',
-            'Siswa',
-            'Menghapus siswa: '.$namaSiswa
-        );
+                Storage::disk('public')->delete($siswa->foto);
 
-        $siswa->delete();
-        
-        return redirect()
-            ->route('siswa.index')
-            ->with('success', 'Data siswa berhasil dihapus.');
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Hapus barcode
+            |--------------------------------------------------------------------------
+            */
+            $barcodePath = 'barcodes/siswa/' . $siswa->nisn . '.png';
+
+            if (
+                $siswa->nisn &&
+                Storage::disk('public')->exists($barcodePath)
+            ) {
+
+                Storage::disk('public')->delete($barcodePath);
+
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Hapus akun login
+            |--------------------------------------------------------------------------
+            */
+            User::where('siswa_id', $siswa->id)->delete();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Hapus data siswa
+            |--------------------------------------------------------------------------
+            */
+            $siswa->delete();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Activity Log
+            |--------------------------------------------------------------------------
+            */
+            ActivityHelper::log(
+                'Hapus Data',
+                'Siswa',
+                'Menghapus siswa: ' . $namaSiswa
+            );
+
+            return redirect()
+                ->route('siswa.index')
+                ->with('success', 'Data siswa berhasil dihapus.');
+
+        } catch (\Throwable $e) {
+
+            report($e);
+
+            return back()->with(
+                'error',
+                'Terjadi kesalahan saat menghapus data siswa.'
+            );
+
+        }
     }
 }

@@ -8,6 +8,8 @@ use App\Models\Siswa;
 use App\Models\Presensi;
 use App\Models\TahunAjaran;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use App\Helpers\ActivityHelper;
 use Throwable;
 
 class IzinController extends Controller
@@ -51,24 +53,51 @@ class IzinController extends Controller
 
         ]);
 
-        $path = $request->file('bukti')
-            ->store('izin', 'public');
+        DB::beginTransaction();
 
-        Izin::create([
+        try {
 
-            'siswa_id'       => $request->siswa_id,
-            'tanggal'        => $request->tanggal,
-            'jenis'          => $request->jenis,
-            'keterangan'     => $request->keterangan,
-            'bukti'          => $path,
-            'status'         => 'Pending',
-            'disetujui_oleh' => null,
+            $path = $request->file('bukti')
+                ->store('izin', 'public');
 
-        ]);
+            $izin = Izin::create([
 
-        return redirect()
-            ->route('izin.index')
-            ->with('success', 'Pengajuan izin berhasil disimpan.');
+                'siswa_id'       => $request->siswa_id,
+                'tanggal'        => $request->tanggal,
+                'jenis'          => $request->jenis,
+                'keterangan'     => $request->keterangan,
+                'bukti'          => $path,
+                'status'         => 'Pending',
+                'disetujui_oleh' => null,
+
+            ]);
+
+            DB::commit();
+
+            ActivityHelper::log(
+                'Tambah Data',
+                'Izin',
+                'Menambahkan izin siswa: '.$izin->siswa->nama
+            );
+
+            return redirect()
+                ->route('izin.index')
+                ->with('success', 'Pengajuan izin berhasil disimpan.');
+
+        } catch (Throwable $e) {
+
+            DB::rollBack();
+
+            report($e);
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'Terjadi kesalahan saat menyimpan izin.'
+                );
+
+        }
     }
 
     /**
@@ -108,12 +137,28 @@ class IzinController extends Controller
             'jenis'      => 'required|in:Izin,Sakit',
             'keterangan' => 'nullable|string',
             'status'     => 'required|in:Pending,Disetujui,Ditolak',
+            'bukti'      => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
 
         ]);
 
         DB::beginTransaction();
 
         try {
+
+            $bukti = $izin->bukti;
+
+            if ($request->hasFile('bukti')) {
+
+                if (
+                    $bukti &&
+                    Storage::disk('public')->exists($bukti)
+                ) {
+                    Storage::disk('public')->delete($bukti);
+                }
+
+                $bukti = $request->file('bukti')
+                    ->store('izin', 'public');
+            }
 
             $izin->update([
 
@@ -122,21 +167,19 @@ class IzinController extends Controller
                 'jenis'          => $request->jenis,
                 'keterangan'     => $request->keterangan,
                 'status'         => $request->status,
+                'bukti'          => $bukti,
                 'disetujui_oleh' => auth()->id(),
 
             ]);
 
-            if ($request->status === 'Disetujui') {
+            $tahunAjaran = TahunAjaran::where('aktif', true)->first();
 
-                $tahunAjaran = TahunAjaran::where('aktif', true)->first();
+            if (
+                $request->status === 'Disetujui' &&
+                $tahunAjaran
+            ) {
 
-                if (!$tahunAjaran) {
-
-                    throw new \Exception('Tahun ajaran aktif belum tersedia.');
-
-                }
-
-                Presensi::firstOrCreate(
+                Presensi::updateOrCreate(
 
                     [
                         'siswa_id' => $izin->siswa_id,
@@ -144,7 +187,7 @@ class IzinController extends Controller
                     ],
 
                     [
-                        'guru_id'         => 1,
+                        'guru_id'         => auth()->user()->guru->id ?? null,
                         'scanner_id'      => auth()->id(),
                         'scan_by'         => auth()->user()->role,
                         'tahun_ajaran_id' => $tahunAjaran->id,
@@ -157,9 +200,22 @@ class IzinController extends Controller
 
                 );
 
+            } else {
+
+                Presensi::where('siswa_id', $izin->siswa_id)
+                    ->whereDate('tanggal', $izin->tanggal)
+                    ->whereIn('status', ['Izin', 'Sakit'])
+                    ->delete();
+
             }
 
             DB::commit();
+
+            ActivityHelper::log(
+                'Edit Data',
+                'Izin',
+                'Mengubah izin siswa: '.$izin->siswa->nama
+            );
 
             return redirect()
                 ->route('izin.index')
@@ -169,10 +225,14 @@ class IzinController extends Controller
 
             DB::rollBack();
 
-            return redirect()
-                ->back()
+            report($e);
+
+            return back()
                 ->withInput()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+                ->with(
+                    'error',
+                    'Terjadi kesalahan saat memperbarui izin.'
+                );
 
         }
     }
@@ -182,10 +242,49 @@ class IzinController extends Controller
      */
     public function destroy(Izin $izin)
     {
-        $izin->delete();
+        DB::beginTransaction();
 
-        return redirect()
-            ->route('izin.index')
-            ->with('success', 'Data izin berhasil dihapus.');
+        try {
+
+            $nama = optional($izin->siswa)->nama ?? '-';
+
+            Presensi::where('siswa_id', $izin->siswa_id)
+                ->whereDate('tanggal', $izin->tanggal)
+                ->whereIn('status', ['Izin', 'Sakit'])
+                ->delete();
+
+            if (
+                $izin->bukti &&
+                Storage::disk('public')->exists($izin->bukti)
+            ) {
+                Storage::disk('public')->delete($izin->bukti);
+            }
+
+            $izin->delete();
+
+            DB::commit();
+
+            ActivityHelper::log(
+                'Hapus Data',
+                'Izin',
+                'Menghapus izin siswa: '.$nama
+            );
+
+            return redirect()
+                ->route('izin.index')
+                ->with('success', 'Data izin berhasil dihapus.');
+
+        } catch (Throwable $e) {
+
+            DB::rollBack();
+
+            report($e);
+
+            return back()->with(
+                'error',
+                'Terjadi kesalahan saat menghapus data.'
+            );
+
+        }
     }
 }

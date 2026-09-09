@@ -456,151 +456,149 @@ $statusColor = [
                     ];
 
                 @endphp
+                
+                @forelse($presensis as $index => $presensi)
 
-            <tbody>
+                <tr>
 
-@forelse($presensis as $index => $presensi)
+                    <td>
 
-<tr>
+                        {{ $presensis->firstItem() + $index }}
 
-    <td>
+                    </td>
 
-        {{ $presensis->firstItem() + $index }}
+                    <td>
 
-    </td>
+                        {{ \Carbon\Carbon::parse($presensi->tanggal)->format('d-m-Y') }}
 
-    <td>
+                    </td>
 
-        {{ \Carbon\Carbon::parse($presensi->tanggal)->format('d-m-Y') }}
+                    <td>
 
-    </td>
+                        {{ substr($presensi->jam_scan,0,5) }}
 
-    <td>
+                    </td>
 
-        {{ substr($presensi->jam_scan,0,5) }}
+                    <td>
 
-    </td>
+                        <div class="d-flex align-items-center">
 
-    <td>
+                            <img
 
-        <div class="d-flex align-items-center">
+                                src="{{ $presensi->siswa->foto
+                                    ? asset('storage/'.$presensi->siswa->foto)
+                                    : 'https://ui-avatars.com/api/?name='.urlencode($presensi->siswa->nama) }}"
 
-            <img
+                                width="45"
 
-                src="{{ $presensi->siswa->foto
-                    ? asset('storage/'.$presensi->siswa->foto)
-                    : 'https://ui-avatars.com/api/?name='.urlencode($presensi->siswa->nama) }}"
+                                height="45"
 
-                width="45"
+                                class="rounded-circle border me-2"
 
-                height="45"
+                                style="object-fit:cover;">
 
-                class="rounded-circle border me-2"
+                            <div>
 
-                style="object-fit:cover;">
+                                <div class="fw-semibold">
 
-            <div>
+                                    {{ $presensi->siswa->nama }}
 
-                <div class="fw-semibold">
+                                </div>
 
-                    {{ $presensi->siswa->nama }}
+                                <small class="text-muted">
 
-                </div>
+                                    NISN :
+                                    {{ $presensi->siswa->nisn }}
 
-                <small class="text-muted">
+                                </small>
 
-                    NISN :
-                    {{ $presensi->siswa->nisn }}
+                            </div>
 
-                </small>
+                        </div>
 
-            </div>
+                    </td>
 
-        </div>
+                    <td>
 
-    </td>
+                        {{ optional($presensi->siswa->kelas)->nama_lengkap }}
 
-    <td>
+                    </td>
 
-        {{ optional($presensi->siswa->kelas)->nama_lengkap }}
+                    <td>
 
-    </td>
+                        <span class="badge bg-{{ $warna[$presensi->status] ?? 'secondary' }}">
 
-    <td>
+                            {{ $presensi->status }}
 
-        <span class="badge bg-{{ $warna[$presensi->status] ?? 'secondary' }}">
+                        </span>
 
-            {{ $presensi->status }}
+                    </td>
 
-        </span>
+                    <td>
 
-    </td>
+                        {{ optional($presensi->scanner)->nama ?? '-' }}
 
-    <td>
+                    </td>
 
-        {{ optional($presensi->scanner)->nama ?? '-' }}
+                    <td>
 
-    </td>
+                        <span class="badge bg-{{ $roleColor[$presensi->scan_by] ?? 'secondary' }}">
 
-    <td>
+                            {{ ucwords(str_replace('_',' ',$presensi->scan_by)) }}
 
-        <span class="badge bg-{{ $roleColor[$presensi->scan_by] ?? 'secondary' }}">
+                        </span>
 
-            {{ ucwords(str_replace('_',' ',$presensi->scan_by)) }}
+                    </td>
 
-        </span>
+                    <td>
 
-    </td>
+                        {{ optional($presensi->guru)->nama ?? '-' }}
 
-    <td>
+                    </td>
 
-        {{ optional($presensi->guru)->nama ?? '-' }}
+                    <td>
 
-    </td>
+                        <span class="badge bg-dark">
 
-    <td>
+                            {{ $presensi->metode }}
 
-        <span class="badge bg-dark">
+                        </span>
 
-            {{ $presensi->metode }}
+                    </td>
 
-        </span>
+                    <td>
 
-    </td>
+                        <small>
 
-    <td>
+                            {{ \Illuminate\Support\Str::limit($presensi->device_name,20) }}
 
-        <small>
+                        </small>
 
-            {{ \Illuminate\Support\Str::limit($presensi->device_name,20) }}
+                    </td>
 
-        </small>
+                </tr>
 
-    </td>
+                @empty
 
-</tr>
+                <tr>
 
-@empty
+                    <td colspan="11" class="text-center py-5">
 
-<tr>
+                        <i class="fa-solid fa-calendar-xmark fa-3x text-secondary mb-3"></i>
 
-    <td colspan="11" class="text-center py-5">
+                        <br>
 
-        <i class="fa-solid fa-calendar-xmark fa-3x text-secondary mb-3"></i>
+                        <span class="text-muted">
 
-        <br>
+                            Belum ada data presensi.
 
-        <span class="text-muted">
+                        </span>
 
-            Belum ada data presensi.
+                    </td>
 
-        </span>
+                </tr>
 
-    </td>
-
-</tr>
-
-@endforelse
+                @endforelse
 
             </tbody>
 

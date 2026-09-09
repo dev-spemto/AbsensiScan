@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Helpers\ActivityHelper;
+use Illuminate\Support\Facades\DB;
 
 class PengurusKelasController extends Controller
 {
@@ -57,166 +58,260 @@ class PengurusKelasController extends Controller
      */
     public function update(Request $request, PengurusKelas $pengurus_kela)
     {
-           
         $request->validate([
+            'ketua_siswa_id' => [
+                'nullable',
+                'exists:siswas,id',
+                'distinct',
+            ],
 
-            'ketua_siswa_id'      => 'nullable|exists:siswas,id',
-            'wakil_siswa_id'      => 'nullable|exists:siswas,id',
-            'sekretaris_siswa_id' => 'nullable|exists:siswas,id',
+            'wakil_siswa_id' => [
+                'nullable',
+                'exists:siswas,id',
+                'distinct',
+            ],
 
+            'sekretaris_siswa_id' => [
+                'nullable',
+                'exists:siswas,id',
+                'distinct',
+            ],
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Kembalikan role akun lama
-        |--------------------------------------------------------------------------
-        */
+        DB::transaction(function () use ($request, $pengurus_kela) {
 
-        foreach ([
-            $pengurus_kela->ketuaUser,
-            $pengurus_kela->wakilUser,
-            $pengurus_kela->sekretarisUser,
-        ] as $user) {
+            /*
+            |--------------------------------------------------------------------------
+            | Simpan ID pengurus lama
+            |--------------------------------------------------------------------------
+            */
 
-            if ($user) {
+            $pengurusLama = array_filter([
+                $pengurus_kela->ketua_siswa_id,
+                $pengurus_kela->wakil_siswa_id,
+                $pengurus_kela->sekretaris_siswa_id,
+            ]);
 
-                $user->update([
-                    'role' => 'guru',
-                ]);
+            /*
+            |--------------------------------------------------------------------------
+            | Hapus akun login pengurus lama
+            |--------------------------------------------------------------------------
+            */
 
+            foreach ([
+                $pengurus_kela->ketuaUser,
+                $pengurus_kela->wakilUser,
+                $pengurus_kela->sekretarisUser,
+            ] as $user) {
+
+                if ($user) {
+                    $user->delete();
+                }
             }
 
-        }
+            /*
+            |--------------------------------------------------------------------------
+            | Reset jabatan siswa lama
+            |--------------------------------------------------------------------------
+            |
+            | Penting:
+            | Pengurus lama tidak boleh tetap memiliki jabatan di tabel siswas.
+            |
+            */
 
-        /*
-        |--------------------------------------------------------------------------
-        | Format nama kelas
-        |--------------------------------------------------------------------------
-        */
+            if (!empty($pengurusLama)) {
 
-        $kelas = strtolower(
-            $pengurus_kela->kelas->tingkat .
-            $pengurus_kela->kelas->nama_kelas
-        );
+                Siswa::whereIn('id', $pengurusLama)
+                    ->update([
+                        'jabatan' => null,
+                    ]);
+            }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Ketua
-        |--------------------------------------------------------------------------
-        */
+            /*
+            |--------------------------------------------------------------------------
+            | Format nama kelas
+            |--------------------------------------------------------------------------
+            */
 
-        $ketuaUser = null;
-
-        if ($request->filled('ketua_siswa_id')) {
-
-            $ketua = Siswa::findOrFail($request->ketua_siswa_id);
-
-            $ketuaUser = User::updateOrCreate(
-
-                [
-                    'username' => "spemto@$kelas",
-                ],
-
-                [
-                    'nama'      => $ketua->nama,
-                    'password'  => Hash::make("ketua@$kelas"),
-                    'role'      => 'ketua_kelas',
-                    'aktif'     => true,
-                    'siswa_id'  => $ketua->id,
-                ]
-
+            $kelas = strtolower(
+                $pengurus_kela->kelas->tingkat .
+                $pengurus_kela->kelas->nama_kelas
             );
 
-        }
+            /*
+            |--------------------------------------------------------------------------
+            | Ketua Kelas
+            |--------------------------------------------------------------------------
+            */
 
-        /*
-        |--------------------------------------------------------------------------
-        | Wakil
-        |--------------------------------------------------------------------------
-        */
+            $ketuaUser = null;
 
-        $wakilUser = null;
+            if ($request->filled('ketua_siswa_id')) {
 
-        if ($request->filled('wakil_siswa_id')) {
+                $ketua = Siswa::findOrFail(
+                    $request->ketua_siswa_id
+                );
 
-            $wakil = Siswa::findOrFail($request->wakil_siswa_id);
+                /*
+                | Isi jabatan siswa
+                */
 
-            $wakilUser = User::updateOrCreate(
+                $ketua->update([
+                    'jabatan' => 'Ketua Kelas',
+                ]);
 
-                [
-                    'username' => "wakil@$kelas",
-                ],
+                /*
+                | Buat akun ketua
+                */
 
-                [
-                    'nama'      => $wakil->nama,
-                    'password'  => Hash::make("wakil@$kelas"),
-                    'role'      => 'wakil_kelas',
-                    'aktif'     => true,
-                    'siswa_id'  => $wakil->id,
-                ]
+                $ketuaUser = User::updateOrCreate(
 
+                    [
+                        'username' => "spemto@$kelas",
+                    ],
+
+                    [
+                        'nama' => $ketua->nama,
+                        'password' => Hash::make("ketua@$kelas"),
+                        'role' => 'ketua_kelas',
+                        'aktif' => true,
+                        'siswa_id' => $ketua->id,
+                    ]
+
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Wakil Kelas
+            |--------------------------------------------------------------------------
+            */
+
+            $wakilUser = null;
+
+            if ($request->filled('wakil_siswa_id')) {
+
+                $wakil = Siswa::findOrFail(
+                    $request->wakil_siswa_id
+                );
+
+                /*
+                | Isi jabatan siswa
+                */
+
+                $wakil->update([
+                    'jabatan' => 'Wakil Kelas',
+                ]);
+
+                /*
+                | Buat akun wakil
+                */
+
+                $wakilUser = User::updateOrCreate(
+
+                    [
+                        'username' => "wakil@$kelas",
+                    ],
+
+                    [
+                        'nama' => $wakil->nama,
+                        'password' => Hash::make("wakil@$kelas"),
+                        'role' => 'wakil_kelas',
+                        'aktif' => true,
+                        'siswa_id' => $wakil->id,
+                    ]
+
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Sekretaris
+            |--------------------------------------------------------------------------
+            */
+
+            $sekretarisUser = null;
+
+            if ($request->filled('sekretaris_siswa_id')) {
+
+                $sekretaris = Siswa::findOrFail(
+                    $request->sekretaris_siswa_id
+                );
+
+                /*
+                | Isi jabatan siswa
+                */
+
+                $sekretaris->update([
+                    'jabatan' => 'Sekretaris',
+                ]);
+
+                /*
+                | Buat akun sekretaris
+                */
+
+                $sekretarisUser = User::updateOrCreate(
+
+                    [
+                        'username' => "sekretaris@$kelas",
+                    ],
+
+                    [
+                        'nama' => $sekretaris->nama,
+                        'password' => Hash::make("sekretaris@$kelas"),
+                        'role' => 'sekretaris',
+                        'aktif' => true,
+                        'siswa_id' => $sekretaris->id,
+                    ]
+
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Simpan relasi Pengurus Kelas
+            |--------------------------------------------------------------------------
+            */
+
+            $pengurus_kela->update([
+
+                'ketua_siswa_id' => $request->ketua_siswa_id,
+                'ketua_user_id' => $ketuaUser?->id,
+
+                'wakil_siswa_id' => $request->wakil_siswa_id,
+                'wakil_user_id' => $wakilUser?->id,
+
+                'sekretaris_siswa_id' => $request->sekretaris_siswa_id,
+                'sekretaris_user_id' => $sekretarisUser?->id,
+
+            ]);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Activity Log
+            |--------------------------------------------------------------------------
+            */
+
+            ActivityHelper::log(
+                'Edit Data',
+                'Pengurus Kelas',
+                'Mengubah pengurus kelas ' .
+                $pengurus_kela->kelas->nama_lengkap
             );
-
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Sekretaris
-        |--------------------------------------------------------------------------
-        */
-
-        $sekretarisUser = null;
-
-        if ($request->filled('sekretaris_siswa_id')) {
-
-            $sekretaris = Siswa::findOrFail($request->sekretaris_siswa_id);
-
-            $sekretarisUser = User::updateOrCreate(
-
-                [
-                    'username' => "sekretaris@$kelas",
-                ],
-
-                [
-                    'nama'      => $sekretaris->nama,
-                    'password'  => Hash::make("sekretaris@$kelas"),
-                    'role'      => 'sekretaris',
-                    'aktif'     => true,
-                    'siswa_id'  => $sekretaris->id,
-                ]
-
-            );
-
-        }
+        });
 
         /*
         |--------------------------------------------------------------------------
-        | Simpan Relasi
+        | Redirect
         |--------------------------------------------------------------------------
         */
-
-        $pengurus_kela->update([
-
-            'ketua_siswa_id'      => $request->ketua_siswa_id,
-            'ketua_user_id'       => $ketuaUser?->id,
-
-            'wakil_siswa_id'      => $request->wakil_siswa_id,
-            'wakil_user_id'       => $wakilUser?->id,
-
-            'sekretaris_siswa_id' => $request->sekretaris_siswa_id,
-            'sekretaris_user_id'  => $sekretarisUser?->id,
-
-        ]);
-
-        ActivityHelper::log(
-            'Edit Data',
-            'Pengurus Kelas',
-            'Mengubah pengurus kelas '.$pengurus_kela->kelas->nama_kelas
-        );
 
         return redirect()
             ->route('pengurus-kelas.index')
-            ->with('success', 'Pengurus kelas berhasil diperbarui.');
+            ->with(
+                'success',
+                'Pengurus kelas berhasil diperbarui.'
+            );
     }
 
     /**

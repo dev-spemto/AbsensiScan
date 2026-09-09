@@ -199,9 +199,25 @@ class DashboardController extends Controller
             ->where('status', 'Alpha')
             ->count();
 
+        $hour = now(
+            $pengaturan?->timezone ?? config('app.timezone')
+        )->hour;
+
+        if ($hour < 11) {
+            $greeting = 'Pagi';
+        } elseif ($hour < 15) {
+            $greeting = 'Siang';
+        } elseif ($hour < 18) {
+            $greeting = 'Sore';
+        } else {
+            $greeting = 'Malam';
+        }
+
         return view('dashboard', compact(
 
             'pengaturan',
+            
+            'greeting',
 
             'totalSiswa',
             'totalGuru',

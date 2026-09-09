@@ -219,6 +219,18 @@ class PresensiController extends Controller
         $presensiHariIni = Presensi::where('siswa_id', $siswa->id)
             ->whereDate('tanggal', $jamSekarang->toDateString())
             ->first();
+        
+        $user = auth()->user();
+
+        $status = $jam <= $pengaturan->batas_terlambat
+            ? Presensi::STATUS_HADIR
+            : Presensi::STATUS_TERLAMBAT;
+
+        $guruId = null;
+
+        if ($user->isGuru() && $user->guru) {
+            $guruId = $user->guru->id;
+        }
 
         if ($presensiHariIni) {
 
@@ -228,7 +240,7 @@ class PresensiController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            if ($presensiHariIni->status == 'Alpha') {
+            if ($presensiHariIni->status == Presensi::STATUS_ALPHA) {
 
                 $presensiHariIni->update([
 
@@ -237,7 +249,7 @@ class PresensiController extends Controller
                     'guru_id'     => $guruId,
                     'jam_scan'    => $jam,
                     'status'      => $status,
-                    'metode'      => 'Barcode',
+                    'metode'      => Presensi::METODE_BARCODE,
                     'device_name' => $request->userAgent(),
 
                 ]);
@@ -280,38 +292,27 @@ class PresensiController extends Controller
             return response()->json([
 
                 'success' => false,
-                'message' => match ($presensiHariIni->status) {
+                'message' => match ($presensiHariIni->status)
+                            {
 
-                    'Hadir'      => 'Siswa sudah hadir hari ini.',
-                    'Terlambat'  => 'Siswa sudah melakukan presensi (Terlambat).',
-                    'Izin'       => 'Siswa sedang berstatus Izin.',
-                    'Sakit'      => 'Siswa sedang berstatus Sakit.',
-                    default      => 'Siswa sudah memiliki presensi hari ini.',
+                                Presensi::STATUS_HADIR =>
+                                    'Siswa sudah hadir hari ini.',
 
-                }
+                                Presensi::STATUS_TERLAMBAT =>
+                                    'Siswa sudah melakukan presensi (Terlambat).',
+
+                                Presensi::STATUS_IZIN =>
+                                    'Siswa sedang berstatus Izin.',
+
+                                Presensi::STATUS_SAKIT =>
+                                    'Siswa sedang berstatus Sakit.',
+
+                                default =>
+                                    'Siswa sudah memiliki presensi hari ini.',
+                            }
 
             ]);
 
-        }
-
-        $status = $jam <= $pengaturan->batas_terlambat
-            ? 'Hadir'
-            : 'Terlambat';
-
-        $user = auth()->user();
-
-        $guruId = null;
-
-        if ($user->isGuru() && $user->guru) {
-            $guruId = $user->guru->id;
-        }
-
-        if (
-        $user->isKetuaKelas() ||
-        $user->isWakilKelas() ||
-        $user->isSekretaris()
-        ) {
-            $guruId = null;
         }
 
     try {
@@ -337,7 +338,7 @@ class PresensiController extends Controller
                 'tanggal'         => $jamSekarang->toDateString(),
                 'jam_scan'        => $jam,
                 'status'          => $status,
-                'metode'          => 'Barcode',
+                'metode'          => Presensi::METODE_BARCODE,
                 'keterangan'      => null,
                 'device_name'     => $request->userAgent(),
 
@@ -498,7 +499,7 @@ class PresensiController extends Controller
     {
         return $siswa->foto
             ? asset('storage/'.$siswa->foto)
-            : 'https://ui-avatars.com/api/?name='.urlencode($siswa->nama).'&size=200';
+            : asset('images/default-user.png');
     }
 
     private function getScannerColor(string $role): string
